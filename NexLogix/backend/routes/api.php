@@ -20,8 +20,6 @@ Route::group([
         ->middleware('auth:api');
 });
 
-
-
 //
 /// GESTION ASIGNACION DE CONDUCTORES POR VEHICULOS
 //

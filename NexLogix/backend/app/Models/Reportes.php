@@ -14,7 +14,7 @@ class Reportes extends Model
     public $timestamps = false;
 
     public $fillable = [
-        'tipoReporte',
+        'idcategoriaReportes',
         'descripcion',
         'fechaCreacion',
         'idusuarios',
@@ -23,5 +23,10 @@ class Reportes extends Model
     public function users()
     {
         return $this->belongsTo(User::class, 'idusuarios', 'idusuarios');
+    }
+
+    public function categoriaReportes()
+    {
+        return $this->belongsTo(CategoriaReportes::class, 'idcategoria', 'idcategoria');
     }
 }
