@@ -1,11 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Rutas;
-
-use App\Http\Controllers\Controller;
-use App\Models\Interfaces\Rutas\IRutasService;
-use App\Models\Interfaces\Rutas\IRutasUseCase;
-use Illuminate\Http\Request;
+namespace App\Http\Controllers\Rutas
 
 class RutasController extends Controller
 {
@@ -51,4 +46,4 @@ class RutasController extends Controller
         return response()->json($response, $response['status']);
     }
 }
-// PENDIENTE IMPLEMENTAR AUDITORIAS 
+// PENDIENTE IMPLEMENTAR AUDITORIAS

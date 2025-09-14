@@ -398,8 +398,32 @@ Route::group([
         ->middleware('role:2');
     Route::delete('/{id}', [RutasController::class, 'deleteRuta'])
         ->middleware('role:2');
+
 });
 
+//
+/// GESTION CATEGORIA REPORTES
+//
+use App\Http\Controllers\ControllerCategoriaReportes;
+
+Route::group([
+    'middleware' => ['api', 'auth:api'],
+    'prefix' => 'gestion_categoria_reportes'
+], function () {
+    Route::get('/', [ControllerCategoriaReportes::class, 'getAllCR'])
+        ->middleware('role:2,3');
+    // pagination route must be before the '/{id}' route to avoid numeric id conflict
+    Route::get('/page/{page}/{order?}', [ControllerCategoriaReportes::class, 'getAllCRPage'])
+        ->middleware('role:2,3');
+    Route::get('/{id}', [ControllerCategoriaReportes::class, 'getCRByID'])
+        ->middleware('role:2,3');
+    Route::post('/', [ControllerCategoriaReportes::class, 'createCR'])
+        ->middleware('role:2');
+    Route::patch('/{id}', [ControllerCategoriaReportes::class, 'updateCR'])
+        ->middleware('role:2');
+    Route::delete('/{id}', [ControllerCategoriaReportes::class, 'deleteCR'])
+        ->middleware('role:2');
+});
 
 //
 /// VEHICULOS
