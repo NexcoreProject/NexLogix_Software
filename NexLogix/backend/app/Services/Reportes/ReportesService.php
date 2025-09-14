@@ -1,18 +1,17 @@
 <?php
 namespace App\Services\Reportes;
 
-use App\Models\Interfaces\Reportes\IReportesService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use App\Models\Reportes;
 use Exception;
-class ReportesService implements IReportesService
+class ReportesService
 {
     public function getAllReportes()
     {
         try {
             // Obtiene todas las asignaciones con relaciones a vehículo y ruta
-            $reporte = Reportes::with('users')->get();
+            $reporte = Reportes::with('users',  'categoriaReportes')->get();
 
             // Si no hay registros, devuelve un mensaje indicando que no existen datos
             if ($reporte->isEmpty()) {
@@ -39,11 +38,64 @@ class ReportesService implements IReportesService
             ];
         }
     }
+
+    public function getAllReportesPaginated(int $page = 1): array
+    {
+        $perPage = 15;
+        try {
+            $page = max(1, (int) $page);
+
+            $query = Reportes::with('users', 'categoriaReportes')
+                ->orderBy('fechaCreacion', 'desc');
+
+            $total = $query->count();
+            if ($total === 0) {
+                return [
+                    'success' => false,
+                    'message' => 'No hay reportes registradas',
+                    'status' => 404,
+                    'data' => [],
+                    'meta' => [
+                        'total' => 0,
+                        'page' => $page,
+                        'perPage' => $perPage,
+                        'lastPage' => 0
+                    ]
+                ];
+            }
+
+            $lastPage = (int) ceil($total / $perPage);
+
+            $items = $query->skip(($page - 1) * $perPage)
+                ->take($perPage)
+                ->get();
+
+            return [
+                'success' => true,
+                'message' => 'Lista de Reportes paginada',
+                'data' => $items,
+                'meta' => [
+                    'total' => $total,
+                    'page' => $page,
+                    'perPage' => $perPage,
+                    'lastPage' => $lastPage
+                ],
+                'status' => 200
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Error al obtener las Categorias Reportes: ' . $e->getMessage(),
+                'status' => 500
+            ];
+        }
+    }
+
     public function getAllReportes_ById(int $id): array
     {
         try {
             // Busca una asignación específica por su ID junto con sus relaciones
-            $reporte = Reportes::with('users')->findOrFail($id);
+            $reporte = Reportes::with('users', 'categoriaReportes')->findOrFail($id);
 
             // Si la encuentra, retorna la información con estado 200
             return [

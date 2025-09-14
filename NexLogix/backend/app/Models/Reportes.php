@@ -16,7 +16,6 @@ class Reportes extends Model
     public $fillable = [
         'idcategoriaReportes',
         'descripcion',
-        'fechaCreacion',
         'idusuarios',
     ];
 
@@ -27,6 +26,6 @@ class Reportes extends Model
 
     public function categoriaReportes()
     {
-        return $this->belongsTo(CategoriaReportes::class, 'idcategoria', 'idcategoria');
+        return $this->belongsTo(CategoriaReportes::class, 'idcategoriaReportes', 'idcategoria');
     }
 }

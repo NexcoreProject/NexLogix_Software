@@ -224,6 +224,8 @@ Route::group([
 ], function(){
     Route::get('/', [ReportesController::class, 'getAllReportes'])
         ->middleware('role:2,3'); // Manager y Empleado;
+    Route::get('/page/{page?}', [ReportesController::class, 'getAllReportesPaginated'])
+        ->middleware('role:2,3');
     Route::get('/{id}', [ReportesController::class, 'getAllReportes_ById'])
         ->middleware('role:2,3'); // Manager y Empleado;
     Route::post('/', [ReportesController::class, 'create_Reportes'])

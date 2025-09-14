@@ -2,16 +2,17 @@
 namespace App\UseCases\Reportes;
 
 use App\Models\Interfaces\Reportes\IReportes_UseCases;
-use App\Models\Interfaces\Reportes\IReportesService;
+use App\Services\Reportes\ReportesService;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 
 
 class ReportesUseCase implements IReportes_UseCases
 {
-    protected IReportesService $reportes_service;
+    protected ReportesService $reportes_service;
 
-    public function __construct(IReportesService $reportes_service)
+    public function __construct(ReportesService $reportes_service)
     {
         $this->reportes_service = $reportes_service;
     }
@@ -22,6 +23,7 @@ class ReportesUseCase implements IReportes_UseCases
         $data['idusuarios'] = Auth::id();
 
         $validator = Validator::make($data, [
+            'idcategoriaReportes' => 'required|integer|exists:categoriaReportes,idcategoria',
             "tipoReporte" => "required|string|max:150",
             "descripcion" => "nullable|string|max:1000",
             "idusuarios" =>  "required|integer|exists:usuarios,idusuarios",
@@ -43,7 +45,11 @@ class ReportesUseCase implements IReportes_UseCases
     public function handleUpdateReporte(int $id, array $data)
     {
         $validator = Validator::make($data, [
-            "tipoReporte" => "sometimes|string|max:150",
+            "idcategoriaReportes" => "sometimes|integer|exists:categoriaReportes,idcategoria",
+            "tipoReporte" => [
+                'sometimes', 'string', 'max:150',
+                Rule::unique('reportes', 'tipoReporte')->ignore($id, 'idReporte'),
+            ],
             "descripcion" => "sometimes|string|max:1000",
             "idusuarios" =>  "sometimes|integer|exists:usuarios,idusuarios",
         ]);
