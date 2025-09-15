@@ -34,21 +34,23 @@ const ManagerProfile = () => {
                     <ul className="nav flex-column">
                       <Link className="nav-link" to="/manager/verAreas">Areas</Link>
                       <Link className="nav-link" to="/manager/Puestos">Puestos</Link>
-                      <Link className="nav-link" to="/manager/Reportes">Reportes</Link>
                       <Link className="nav-link" to="/manager/Roles">Roles</Link>
                       <Link className="nav-link" to="/manager/gestionUsuarios">Usuarios</Link>
                     </ul>
                   </div>
                 </li>
 
-                {/* Opción Auditorías con submenú */}
+                {/* Opción Gestión Auditorías y Reportes con submenú */}
                 <li className="nav-item">
-                  <Link className="nav-link" data-bs-toggle="collapse" to="#AuditoriasSubmenu" role="button" aria-expanded="false" aria-controls="AuditoriasSubmenu">
-                    Gestion Auditorias
+                  <Link className="nav-link" data-bs-toggle="collapse" to="#gestionAuditoriasReportes" role="button" aria-expanded="false" aria-controls="gestionAuditoriasReportes">
+                    Gestión auditorías y reportes
                   </Link>
-                  <div className="collapse" id="AuditoriasSubmenu">
+                  <div className="collapse" id="gestionAuditoriasReportes">
                     <ul className="nav flex-column">
-                      <Link className="nav-link" to="/manager/auditorias">Lista de auditorías</Link>
+                      <Link className="nav-link" to="/manager/reportes">Reportes</Link>
+                      <Link className="nav-link" to="/manager/categoriaReportes">Categoría reportes</Link>
+                      <Link className="nav-link" to="/manager/auditorias">Auditorías</Link>
+                      <Link className="nav-link" to="/manager/logs">Logs</Link>
                     </ul>
                   </div>
                 </li>

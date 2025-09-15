@@ -11,7 +11,11 @@ function App() {
         setAuthHeader(); 
     }, []); // Arreglo de dependencias vacío asegura que el efecto se ejecute solo una vez al montar
 
-    return <AppRouter />; // Renderiza el componente AppRouter, que contiene toda la lógica de enrutamiento de la SPA
+    return (
+        <div className="app-container">
+            <AppRouter />
+        </div>
+    ); // Renderiza el componente AppRouter envuelto en un contenedor con fondo consistente
 }
 
 export default App; // Exporta App como componente predeterminado para ser usado en main.tsx

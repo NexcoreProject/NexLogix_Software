@@ -49,24 +49,18 @@
 
 /* Listas dentro de la tarjeta */
 .list-group-item {
-  background-color: #1a1a2b;
-  color: #ffffff;
-  border-color: #3a4a6a;
+  background-color: #161624 !important; /* Color morado claro fijo */
+  color: #ffffff !important; /* Texto oscuro para contraste */
+  border-color: #161624 !important;
   padding: 16px 20px;
   border-radius: 10px !important; /* Bordes redondeados completos */
   margin-bottom: 10px;
-  transition: background 0.2s;
   font-size: 1.04em;
 }
 
 .list-group-item strong {
-  color: #ffffff;
-}
+  color: #ffffff !important; /* Texto blanco para que se vea bien sobre fondo oscuro */
 
-/* Elimina el efecto hover */
-.list-group-item:hover {
-  background-color: #1a1a2b;
-}
 
 /* Badges */
 .badge.bg-primary {
@@ -132,7 +126,10 @@
     padding: 12px 8px;
   }
   .list-group-item {
+    background-color: #86aaf9 !important; /* Mantenemos el color morado claro en móviles */
+    color: #161625 !important; /* Texto oscuro para contraste */
     padding: 10px 8px;
     font-size: 0.98em;
   }
+}
 }

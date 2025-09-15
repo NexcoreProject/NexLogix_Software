@@ -36,6 +36,10 @@ import AcercaDe from "../Views/componets/Footers/AcercaDe";
 
 // AUDITORIAS
 import Auditorias from "../Views/pages/Auditorias/Auditorias";
+
+// NUEVAS SECCIONES PARA GESTIÓN AUDITORÍAS Y REPORTES
+import CategoriaReportes from "../Views/pages/CategoriaReportes/CategoriaReportes";
+import Logs from "../Views/pages/Logs/Logs";
 // desde aqui se hacen las rutas como es una ruta privada....
 
 const ProtectedRouteManagers = () => {
@@ -53,13 +57,14 @@ const ProtectedRouteManagers = () => {
         {/*GESTION ADMINISTRACION*/}
         <Route path="verAreas" element={<VerAreas />} />
         <Route path="puestos" element={<Puestos />} />
-        <Route path="reportes" element={<Reportes />} />
         <Route path="roles" element={<Roles />} />
         <Route path="gestionUsuarios" element={<GestionUsuarios />} />
 
-
-        {/*GESTION AUDITORIAS*/}
+        {/*GESTION AUDITORIAS Y REPORTES*/}
+        <Route path="reportes" element={<Reportes />} />
+        <Route path="categoriaReportes" element={<CategoriaReportes />} />
         <Route path="auditorias" element={<Auditorias />} />
+        <Route path="logs" element={<Logs />} />
         {/*GESTION CIUDADES*/}
         <Route path="ciudades" element={<Ciudades />} />
 
