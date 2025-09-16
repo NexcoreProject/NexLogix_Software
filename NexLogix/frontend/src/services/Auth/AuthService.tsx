@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { UserProfile } from '../../models/Interfaces/UserProfile';
 const API_URL = 'http://localhost:8000/api/auth';
 
+// Respuesta esperada del backend al iniciar sesión
 export interface LoginResponse {
   success: boolean;
   message: string;
@@ -23,6 +24,7 @@ interface BackendErrorData {
   errors?: Record<string, string[] | string>;
 }
 
+// Traduce idRole numérico del backend a etiqueta usada en el frontend
 const getRoleName = (idRole: number): string => {
   switch (idRole) {
     case 1:
@@ -39,6 +41,15 @@ const getRoleName = (idRole: number): string => {
   }
 };
 
+/**
+ * AuthLoginService
+ * - Llama al endpoint de login
+ * - Valida "success" y token
+ * - Persiste token/rol/usuario en localStorage
+ * - Devuelve la respuesta tipada o lanza Error con mensaje amigable
+ *
+ * Si tocas esta función, revisa PrivateRoute y useAuth (dependen del storage).
+ */
 export const AuthLoginService = async (
   email: string,
   contrasena: string
@@ -150,6 +161,7 @@ export const AuthLoginService = async (
 
 // ————————————————————————
 // 2) Manejo del header Authorization
+//    Úsalo si haces peticiones con axios (default) fuera de axiosInstance
 // ————————————————————————
 export const setAuthHeader = () => {
     const token = getToken();
@@ -182,7 +194,8 @@ export const setAuthHeader = () => {
 
 // ————————————————————————
 // 4) Hook de autenticación
-  //  esta parte es importante porque es la que usa Private Router
+//    Fuente única de verdad para saber si la app está autenticada
+//    PrivateRoute confía en esto + localStorage como respaldo.
 // ————————————————————————
 
 export const useAuth = () => {
@@ -221,7 +234,8 @@ export const useAuth = () => {
 };
 
 // ————————————————————————
-// 5) SHOW PROFILE 
+// 5) SHOW PROFILE
+//    Obtiene los datos del usuario autenticado usando el token
 // ————————————————————————
 
 export const getUserProfile = async (): Promise<UserProfile> => {
@@ -255,7 +269,8 @@ export const getUserProfile = async (): Promise<UserProfile> => {
 
 
 // ————————————————————————
-// 6) Logout 
+// 6) Logout
+//    Invoca al backend para invalidar el token y limpia el storage
 // ————————————————————————
 export const LogoutUser = async (): Promise<void> => {
   const token = localStorage.getItem('token');

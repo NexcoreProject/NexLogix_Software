@@ -12,7 +12,8 @@ import PrivateRoute from "./PrivateRoute"; // Importa el componente que protege 
 import ProtectedRouteEmpleados from "./ProtectedRouterEmpleados"; // Importa el componente de rutas protegidas para el rol Empleado
 import ProtectedRouteManagers from "./ProtectedRouterManagers"; // Importa el componente de rutas protegidas para el rol Manager
 
-// Componente interno que tiene acceso al contexto de navegación
+// RouterContent: se monta dentro de BrowserRouter para tener acceso a navigate.
+// Inyecta navigate en axiosConfig (para redirecciones globales) y define todas las rutas.
 const RouterContent = () => {
   const navigate = useNavigate();
   
@@ -24,7 +25,7 @@ const RouterContent = () => {
   }, [navigate]);
 
   return (
-    <Routes> {/* Define un contenedor para todas las rutas de la aplicación */}
+  <Routes> {/* Contenedor de rutas de la app */}
 
                 {/* RUTAS PÚBLICAS */}
                 <Route path="/" index element={<Login />} /> {/* Ruta pública para la página de login, marcada como ruta raíz */}
@@ -61,7 +62,7 @@ const RouterContent = () => {
   );
 };
 
-// DEFINE EL COMPONENTE FUNCIONAL DE AppRouter PARA CONFIGURAR LAS RUTAS PRINCIPALES
+// AppRouter: responsable de envolver todo en BrowserRouter (historial HTML5)
 const AppRouter = () => {
   return (
     <BrowserRouter>

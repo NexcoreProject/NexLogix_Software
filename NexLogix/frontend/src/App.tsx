@@ -2,10 +2,10 @@ import AppRouter from "./Routers/AppRouter"; // Importa el componente AppRouter 
 import { setAuthHeader } from './services/Auth/AuthService'; // Importa la función setAuthHeader para configurar el encabezado de autenticación
 import { useEffect } from "react"; // Importa el hook useEffect de React para ejecutar efectos secundarios
 
-// Define el componente funcional App, que sirve como raíz de la aplicación
+// App: raíz de la SPA. Aquí sólo hacemos boot de cosas globales (auth header) y renderizamos el router.
 function App() { 
 
-    // Define un efecto secundario que se ejecuta al montar el componente
+    // Al montar: empuja el token (si existe) al header Authorization por defecto
     useEffect(() => { 
         // Llama a setAuthHeader para establecer el encabezado Authorization con el token (si existe) en las solicitudes HTTP
         setAuthHeader(); 

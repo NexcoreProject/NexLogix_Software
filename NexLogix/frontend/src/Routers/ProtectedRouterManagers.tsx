@@ -40,7 +40,7 @@ import Auditorias from "../Views/pages/Auditorias/Auditorias";
 // NUEVAS SECCIONES PARA GESTIÓN AUDITORÍAS Y REPORTES
 import CategoriaReportes from "../Views/pages/CategoriaReportes/CategoriaReportes";
 import Logs from "../Views/pages/Logs/Logs";
-// desde aqui se hacen las rutas como es una ruta privada....
+// Rutas privadas para Manager: cuelgan del layout ManagerProfile (sidebar + contenido)
 
 const ProtectedRouteManagers = () => {
   return (
@@ -54,32 +54,32 @@ const ProtectedRouteManagers = () => {
         <Route path="editarArea" element={<EditarAreas />} />
         <Route path="eliminarArea" element={<EliminarArea />} /> */}
 
-        {/*GESTION ADMINISTRACION*/}
+  {/* GESTIÓN ADMINISTRACIÓN: CRUD de catálogos y usuarios */}
         <Route path="verAreas" element={<VerAreas />} />
         <Route path="puestos" element={<Puestos />} />
         <Route path="roles" element={<Roles />} />
         <Route path="gestionUsuarios" element={<GestionUsuarios />} />
 
-        {/*GESTION AUDITORIAS Y REPORTES*/}
+  {/* Auditorías y reportes del sistema */}
         <Route path="reportes" element={<Reportes />} />
         <Route path="categoriaReportes" element={<CategoriaReportes />} />
         <Route path="auditorias" element={<Auditorias />} />
         <Route path="logs" element={<Logs />} />
-        {/*GESTION CIUDADES*/}
+  {/* Gestión logística */}
         <Route path="ciudades" element={<Ciudades />} />
 
-        {/*GESTION ENVIOS*/}
+  {/* Gestión envíos */}
         <Route path="envios" element={<Envios />} />
         
 
-        {/*GESTION RUTAS*/}
+  {/* Gestión rutas */}
         <Route path="rutas" element={<Rutas />} />
-        {/*GESTION VEHICULOS*/}
+  {/* Gestión vehículos */}
         <Route path="vehiculos" element={<GestionVehiculos />} />
-        {/*GESTION CONDUCTORES*/}
+  {/* Gestión conductores */}
         <Route path="conductores" element={<Conductores />} />
 
-        {/*HOME MANAGER*/}
+  {/* Home manager (vista principal) */}
 
         {/*FOOTER*/}
         <Route path="ubicacion" element={<EstamosUbicadosEn />} />

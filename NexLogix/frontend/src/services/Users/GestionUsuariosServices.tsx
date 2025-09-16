@@ -10,7 +10,7 @@ import {
 import axios from 'axios';
 import { axiosInstance } from '../axiosConfig';
 
-// Helper para formatear errores de Axios evitando any
+// Helper: normaliza errores de Axios a IApiResponse para no propagar any ni shape desconocidos
 function formatAxiosError<T>(error: unknown, fallbackMessage: string, fallbackData: T, fallbackStatus?: number): IApiResponse<T> {
     if (axios.isAxiosError(error)) {
         const status = error.response?.status ?? fallbackStatus;
@@ -37,7 +37,7 @@ function formatAxiosError<T>(error: unknown, fallbackMessage: string, fallbackDa
     } as IApiResponse<T>;
 }
 
-// Servicio para Usuarios
+// Servicio de Usuarios: encapsula endpoints relacionados a usuarios
 export const UsuariosService = {
     async getAll(): Promise<IApiResponse<IUsuario[]>> {
         try {
@@ -93,7 +93,7 @@ export const UsuariosService = {
     }
 };
 
-// Servicios para Catálogos
+// Servicios de Catálogos: roles, puestos, estados
 export const CatalogosService = {
     async getRoles(): Promise<IApiResponse<IRol[]>> {
         try {

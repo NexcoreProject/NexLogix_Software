@@ -9,8 +9,10 @@ import {
 } from '../../models/Interfaces/IGestionUsuarios';
 import { UsuariosService, CatalogosService } from '../../services/Users/GestionUsuariosServices';
 
+// UseCase: orquesta la lógica de aplicación para Gestión de Usuarios.
+// Mantiene a los componentes UI alejados de detalles de servicios/axios.
 export class GestionUsuariosUseCase {
-    // Métodos principales para usuarios
+    // CRUD Usuarios
     async getAllUsuarios(): Promise<IApiResponse<IUsuario[]>> {
         return UsuariosService.getAll();
     }
@@ -31,7 +33,7 @@ export class GestionUsuariosUseCase {
         return UsuariosService.delete(id);
     }
 
-    // Métodos para catálogos
+    // Catálogos relacionados (roles/puestos/estados)
     async getRoles(): Promise<IApiResponse<IRol[]>> {
         return CatalogosService.getRoles();
     }

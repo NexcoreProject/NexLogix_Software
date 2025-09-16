@@ -6,7 +6,7 @@ import RutasConductor from "../Views/pages/EmpleadoPages/RutasConductor";
 import VehiculosConductor from "../Views/pages/EmpleadoPages/VehiculosConductor";
 import EstamosUbicadosEn from "../Views/componets/Footers/EstamosUbicadoEn";
 import AcercaDe from "../Views/componets/Footers/AcercaDe";
-// importa más páginas si tienes...
+// Rutas privadas para Empleado/Conductor: cuelgan del layout EmpleadoProfile (sidebar + contenido)
 
 const ProtectedRouteEmpleados = () => {
   return (
@@ -14,15 +14,15 @@ const ProtectedRouteEmpleados = () => {
       <Route path="/" element={<EmpleadoProfile />}>
         <Route index element={<HomeEmpleado />} />
 
-        {/*ROUTERS GESTIONS ENVIOS*/}
+  {/* Gestión envíos (si aplica a empleado/conductor) */}
 
-        {/*ROUTERS RUTAS*/}
+  {/* Gestión de rutas del conductor */}
         <Route path="rutas" element={<RutasConductor />} />
 
-        {/* ROUTERS VEHICULOS */}
+  {/* Gestión de vehículos asignados */}
         <Route path="vehiculos" element={<VehiculosConductor />} />
 
-        {/* ROUTERS REPORTES */}
+  {/* Reportes que genera el conductor */}
         {<Route path="reportes" element={<ReportesConductor />} />}
 
         <Route path="ubicacion" element={<EstamosUbicadosEn />} />

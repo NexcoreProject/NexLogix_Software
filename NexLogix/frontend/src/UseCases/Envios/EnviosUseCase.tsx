@@ -21,11 +21,12 @@ import {  RecogidaData, EntregaData, EnvioData} from '../../models/Interfaces/IE
     };
   }
   
+  // Caso de uso: crear un envío orquestando recogida -> entrega -> envío
   export class CrearEnvioUseCase {
     async execute(data: EnvioFormData): Promise<{ success: boolean; message: string; errors?: Record<string, string> }> {
       const errors: Record<string, string> = {};
   
-      // Validaciones
+  // Validaciones mínimas (lado cliente) para evitar llamadas inválidas
       if (!data.nombreRemitente) errors.nombreRemitente = 'El nombre del remitente es requerido';
       if (!data.num_ContactoRemitente.match(/^[0-9+]+$/)) errors.num_ContactoRemitente = 'El teléfono debe contener solo números';
       if (!data.nombreDestinatario) errors.nombreDestinatario = 'El nombre del destinatario es requerido';
@@ -44,7 +45,7 @@ import {  RecogidaData, EntregaData, EnvioData} from '../../models/Interfaces/IE
       }
   
       try {
-        // Crear recogida
+  // 1) Crear recogida
         const recogidaData: RecogidaData = {
           fechaRecogidaSeleccionada: data.recogida.fechaRecogidaSeleccionada,
           direccionRecogida: data.recogida.direccionRecogida,
@@ -56,7 +57,7 @@ import {  RecogidaData, EntregaData, EnvioData} from '../../models/Interfaces/IE
         }
         const idRecogida = recogidaResponse.data.idRecogida;
   
-        // Crear entrega
+  // 2) Crear entrega
         const entregaData: EntregaData = {
           fechaEntregaSeleccionada: data.entrega.fechaEntregaSeleccionada,
           direccionEntrega: data.entrega.direccionEntrega,
@@ -68,7 +69,7 @@ import {  RecogidaData, EntregaData, EnvioData} from '../../models/Interfaces/IE
         }
         const idEntrega = entregaResponse.data.idEntrega;
   
-        // Crear envío
+  // 3) Crear envío (relaciona ids de recogida y entrega)
         const envioData: EnvioData = {
           nombreRemitente: data.nombreRemitente,
           num_ContactoRemitente: data.num_ContactoRemitente,

@@ -9,8 +9,10 @@ import {
 } from '../../models/Interfaces/IGestionUsuarios';
 import { gestionUsuariosUseCase } from '../../UseCases/Users/GestionUsuariosUseCase';
 
+// Hook controlador de Gestión de Usuarios
+// Centraliza estado/efectos para que la UI sólo consuma datos y acciones.
 export const useUsuariosController = () => {
-    // Estados principales
+    // Estados principales de la lista y carga/errores
     const [usuarios, setUsuarios] = useState<IUsuario[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
@@ -20,7 +22,7 @@ export const useUsuariosController = () => {
     const [puestos, setPuestos] = useState<IPuesto[]>([]);
     const [estados, setEstados] = useState<IEstado[]>([]);
 
-    // Cargar usuarios
+    // Cargar usuarios (lista completa)
     const cargarUsuarios = async () => {
         setIsLoading(true);
         setErrorMessage('');
@@ -42,7 +44,7 @@ export const useUsuariosController = () => {
 
     // Nota: Carga de catálogos se realiza en el init del useEffect inicial
 
-    // Buscar usuario
+    // Buscar usuario por identificador
     const buscarUsuario = async (value: string) => {
         setIsLoading(true);
         setErrorMessage('');
@@ -62,7 +64,7 @@ export const useUsuariosController = () => {
         }
     };
 
-    // Crear usuario
+    // Crear usuario (devuelve true si todo ok)
     const crearUsuario = async (usuario: ICreateUsuarioDTO) => {
         setIsLoading(true);
         setErrorMessage('');
@@ -83,7 +85,7 @@ export const useUsuariosController = () => {
         }
     };
 
-    // Actualizar usuario
+    // Actualizar usuario por id
     const actualizarUsuario = async (id: number, usuario: IUpdateUsuarioDTO) => {
         setIsLoading(true);
         setErrorMessage('');
@@ -104,7 +106,7 @@ export const useUsuariosController = () => {
         }
     };
 
-    // Eliminar usuario
+    // Eliminar usuario por id
     const eliminarUsuario = async (id: number) => {
         setIsLoading(true);
         setErrorMessage('');
@@ -125,7 +127,7 @@ export const useUsuariosController = () => {
         }
     };
 
-    // Cargar datos iniciales sin parpadeo (manejo único de isLoading)
+    // Init: carga paralela de datos para evitar parpadeos
     useEffect(() => {
         const init = async () => {
             setIsLoading(true);
