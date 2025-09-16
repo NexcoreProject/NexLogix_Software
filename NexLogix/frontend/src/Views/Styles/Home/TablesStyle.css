@@ -28,8 +28,18 @@
   padding: 8px; /* Espaciado interno de la celda */
   vertical-align: middle; /* Centra verticalmente el contenido */
   text-align: center; /* Centra horizontalmente el contenido */
-  background-color: #232c42; /* Color de fondo de la celda */
-  border-top: 1px solid #3a4a6a; /* Borde superior de la celda */
+  background-color: #232c42; /* Color de fondo base de la celda */
+  border-top: none; /* Evita doble borde; usaremos separador inferior por fila */
+}
+
+/* Separador sutil entre filas (excepto la última) */
+.table:not(.table-unstyled) tbody tr:not(:last-child) td {
+  border-bottom: 1px solid rgba(58, 74, 106, 0.9);
+}
+
+/* Zebra striping suave para mejorar lectura */
+.table:not(.table-unstyled) tbody tr:nth-child(even) td {
+  background-color: #26314b; /* tono ligeramente distinto */
 }
 
 .table:not(.table-unstyled) tbody tr:hover { /* Estilo al pasar el mouse sobre una fila */
@@ -101,12 +111,21 @@
 
 .table tbody td { /* Celdas del cuerpo de la tabla */
   word-wrap: break-word; /* Permite que el texto se divida en varias líneas */
-  background-color: #2f3d5c; /* Fondo de la celda */
+  background-color: #2f3d5c; /* Fondo de la celda (fallback para tablas no cubiertas arriba) */
   overflow-wrap: break-word; /* Rompe palabras largas */
   max-width: 300px; /* Ancho máximo de la celda */
   padding: 10px; /* Espaciado interno */
   vertical-align: top; /* Alinea el contenido arriba */
   color: #e0e0e0; /* Color del texto */
+  border-top: none; /* Evita duplicar líneas */
+}
+
+/* Separador y zebra striping para cualquier .table genérica */
+.table tbody tr:not(:last-child) td {
+  border-bottom: 1px solid rgba(58, 74, 106, 0.8);
+}
+.table tbody tr:nth-child(even) td {
+  background-color: #273451;
 }
 
 /* Media query para responsividad en pantallas pequeñas */

@@ -64,8 +64,18 @@ html, body {
         vertical-align: middle;     /* Centra verticalmente el contenido */
         text-align: center;         /* Centra horizontalmente el contenido */
         background-color: #232c42;  /* Color de fondo de la celda */
-        border-top: 1px solid #3a4a6a; /* Borde superior de la celda */
-} 
+        border-top: none; /* Evita doble borde con separador inferior */
+}
+
+/* Separador sutil entre filas */
+.table.custom-table tbody tr:not(:last-child) td {
+    border-bottom: 1px solid rgba(58, 74, 106, 0.9);
+}
+
+/* Zebra striping suave */
+.table.custom-table tbody tr:nth-child(even) td {
+    background-color: #26314b;
+}
 
 /* Hover de filas */
 .table.custom-table tbody tr:hover {

@@ -52,8 +52,12 @@ html, body {
     vertical-align: middle;
     text-align: center;
     background-color: #232c42;
-    border-top: 1px solid #3a4a6a;
+    border-top: none; /* Evita doble borde */
 }
+
+/* Separador sutil entre filas y zebra striping */
+.table.custom-table tbody tr:not(:last-child) td { border-bottom: 1px solid rgba(58,74,106,0.9); }
+.table.custom-table tbody tr:nth-child(even) td { background-color: #26314b; }
 .table.custom-table tbody tr:hover {
     background-color: #2c3958;
     transition: background-color 0.3s ease;
