@@ -15,6 +15,14 @@ export interface LoginResponse {
   status: number;
 }
 
+// Estructura de error estandarizada desde el backend
+interface BackendErrorData {
+  success?: boolean;
+  message?: string;
+  status?: number;
+  errors?: Record<string, string[] | string>;
+}
+
 const getRoleName = (idRole: number): string => {
   switch (idRole) {
     case 1:
@@ -49,6 +57,14 @@ export const AuthLoginService = async (
     );
 
     console.log("[AuthLoginService] Respuesta completa del backend:", response.data);
+
+    // Si el backend responde con success=false, propagar el mensaje con código en lugar de continuar
+    if (!response.data?.success) {
+      const code = response.data?.status ?? 'ERROR';
+      const msg = response.data?.message || 'Inicio de sesión no válido.';
+      throw new Error(`Error ${code}: ${msg}`);
+    }
+
     const { token, user } = response.data;
     console.log("[AuthLoginService] Usuario recibido:", user);
     console.log("[AuthLoginService] idRole recibido:", user.idRole);
@@ -56,6 +72,9 @@ export const AuthLoginService = async (
     const roleName = getRoleName(user.idRole);
     console.log("[AuthLoginService] Rol mapeado:", roleName);
 
+    if (!token) {
+      throw new Error('El servidor no envió un token de autenticación.');
+    }
     localStorage.setItem("token", token);
     localStorage.setItem("userRole", roleName);
     localStorage.setItem("user", JSON.stringify(user));
@@ -66,9 +85,65 @@ export const AuthLoginService = async (
     });
 
     return response.data;
-  } catch (error) {
+  } catch (error: unknown) {
+    // Log inicial
     console.error("[AuthLoginService] Error en login:", error);
-    return null;
+
+    // Si es un error HTTP desde axios, intentamos extraer el mensaje del backend
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      const data = (error.response?.data ?? {}) as BackendErrorData;
+
+      // Construimos un mensaje amigable basado en la respuesta del backend
+      let backendMsg = data.message;
+
+      // Si vienen errores de validación, los concatenamos
+      if (data.errors && typeof data.errors === 'object') {
+        const detalles = Object.entries(data.errors)
+          .flatMap(([campo, msgs]) => {
+            const textos = Array.isArray(msgs) ? msgs : [msgs];
+            return textos.map((t) => `${campo}: ${t}`);
+          })
+          .join(' | ');
+        backendMsg = backendMsg ? `${backendMsg}: ${detalles}` : detalles;
+      }
+
+      // Mensajes por estado común
+      if (!backendMsg) {
+        switch (status) {
+          case 400:
+            backendMsg = 'Solicitud inválida.';
+            break;
+          case 401:
+            backendMsg = 'No autorizado. Verifica tus credenciales.';
+            break;
+          case 403:
+            backendMsg = 'Acceso prohibido.';
+            break;
+          case 404:
+            backendMsg = 'Recurso no encontrado.';
+            break;
+          case 405:
+            backendMsg = 'Contraseña inválida.';
+            break;
+          case 422:
+            backendMsg = 'Errores de validación.';
+            break;
+          case 500:
+            backendMsg = 'Error interno del servidor.';
+            break;
+          default:
+            backendMsg = 'Ocurrió un error al iniciar sesión.';
+        }
+      }
+
+      // Anteponer código al mensaje para mostrarlo en el banner
+      const codeTxt = status ?? 'ERROR';
+      throw new Error(`Error ${codeTxt}: ${backendMsg}`);
+    }
+
+    // Si no hay respuesta (problema de red / servidor caído)
+    throw new Error('Error CONEXION: No se pudo conectar con el servidor. Asegúrate de que el backend esté ejecutándose.');
   }
 };
 

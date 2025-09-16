@@ -18,13 +18,20 @@ const Login = () => { // Define el componente funcional Login para la página de
               <h2 className="fw-bold mb-5">NexLogix</h2> {/* Nombre de la aplicación como marca */}
             </div>
               {error && ( /* Muestra un toast para errores en lugar de alert */
-              <div className="toast show mx-auto mb-3" role="alert">
-                <div className="toast-header bg-danger text-white">
-                  <strong className="me-auto">Error</strong>
-                  <button type="button" className="btn-close" data-bs-dismiss="toast"></button>
-                </div>
-                <div className="toast-body">{error}</div>
-              </div>
+              (() => {
+                const match = error.match(/^Error\s+([^:]+):\s*(.*)$/i);
+                const code = match ? match[1] : null;
+                const message = match ? match[2] : error;
+                return (
+                  <div className="toast show mx-auto mb-3" role="alert">
+                    <div className="toast-header bg-danger text-white">
+                      <strong className="me-auto">{`Error${code ? ` ${code}` : ''}`}</strong>
+                      <button type="button" className="btn-close" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div className="toast-body text-white">{message}</div>
+                  </div>
+                );
+              })()
             )}
             <form onSubmit={handleSubmit}> {/* Formulario que ejecuta handleSubmit al enviarse */}
               <div className="mb-3"> {/* Campo de correo con ícono */}
