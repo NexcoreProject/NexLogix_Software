@@ -41,15 +41,32 @@ const Login = () => { // Componente de Login (solo UI cambiada)
   };
 
   return (
-    <div className="login-page">
-      <div className="login-lights" aria-hidden></div>
-      <div className="login-lights second" aria-hidden></div>
+    <div className="auth-page">
+      <div className="auth-bg" aria-hidden></div>
+      <div className="auth-bg second" aria-hidden></div>
 
-      <div className="login-shell">
-        <div className="login-card" role="dialog" aria-label="Formulario de inicio de sesión">
-          <div className="brand">
-            <h2 className="brand-title">NexLogix</h2>
-            <p className="brand-sub">Acceso seguro</p>
+      <div className="auth-grid">
+        {/* Panel izquierdo (hero) */}
+        <section className="auth-hero" aria-label="Bienvenida NexLogix">
+          <div className="hero-inner">
+            <div className="hero-badge">Plataforma logística</div>
+            <h1 className="hero-title">
+              Bienvenid@ a <span className="brand-gradient">NexLogix</span>
+            </h1>
+            <p className="hero-sub">Gestiona envíos, rutas y flotas con una experiencia moderna y segura.</p>
+            <ul className="hero-bullets" aria-label="Ventajas de la plataforma">
+              <li><i className="bi bi-shield-lock"></i> Seguridad con JWT</li>
+              <li><i className="bi bi-graph-up"></i> Operación eficiente</li>
+              <li><i className="bi bi-truck"></i> Logística en tiempo real</li>
+            </ul>
+          </div>
+        </section>
+
+        {/* Panel derecho (form) */}
+        <section className="auth-card" role="dialog" aria-label="Formulario de inicio de sesión">
+          <div className="auth-card-header">
+            <h2>Iniciar sesión</h2>
+            <p>Ingresa tus credenciales para continuar</p>
           </div>
 
           {error && (
@@ -108,7 +125,7 @@ const Login = () => { // Componente de Login (solo UI cambiada)
               ¿Usuario Bloqueado?
             </button>
           </form>
-        </div>
+        </section>
       </div>
 
       {showBlocked && (
