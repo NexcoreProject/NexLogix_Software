@@ -1,0 +1,41 @@
+/* Estilos sutiles para páginas de información (Ubicación y Acerca de) */
+
+.info-section {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.info-title {
+  color: #e7e7f3;
+  font-weight: 700;
+}
+
+.info-subtitle {
+  color: #bdbddd;
+}
+
+.info-card {
+  background: linear-gradient(180deg, rgba(35,35,74,0.55), rgba(26,26,54,0.55));
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+.map-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.map-embed {
+  width: 100%;
+  max-width: 900px;
+  height: 500px;
+  border: 0;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+}
+
+@media (max-width: 576px) {
+  .map-embed { height: 360px; }
+}

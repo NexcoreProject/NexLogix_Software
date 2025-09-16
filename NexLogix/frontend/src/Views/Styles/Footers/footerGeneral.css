@@ -8,10 +8,11 @@
   flex-shrink: 0; /* Evita que el footer se comprima */
 }
 
-.footer a:hover, 
+/* No cambiar colores en hover para enlaces del footer */
+.footer a:hover,
 .footer .nav-item:hover {
-  background-color: #0056b3;
-  color: aliceblue;
+  background-color: inherit;
+  color: inherit;
 }
 
 .footer-card {
@@ -41,12 +42,17 @@
   font-size: 1rem;
   text-decoration: none;
   transition: color 0.2s;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 14px; /* para que el hover respete el borde redondeado */
 }
 
 .footer .footer-link:hover {
-  color: #00bfff;
-  text-decoration: underline;
-  background: none;
+  color: inherit; /* mantener el mismo color */
+  text-decoration: none; /* sin subrayado */
+  background-color: transparent; /* sin fondo azul */
 }
 
 .footer-copyright {

@@ -1,10 +1,12 @@
+import "../../Styles/Footers/infoPages.css";
+
 const AcercaDe = () => {
     return (
         <>
-            <div className="container py-5">
-                <h1 className="text-center text-white mt-4 mb-4">Acerca de NexLogix</h1>
-                <div className="p-5">
-                    <p className="text-white">
+            <div className="container py-5 info-section">
+                <h1 className="text-center mt-4 mb-4 info-title">Acerca de NexLogix</h1>
+                <div className="info-card p-4 p-md-5">
+                    <p className="mb-0" style={{ color: "#d9d9e6" }}>
                         Somos una empresa dedicada a la logística y envíos a nivel nacional. Nuestro objetivo es brindar un
                         servicio rápido, seguro y eficiente para satisfacer las necesidades de nuestros clientes. Contamos con
                         un equipo profesional comprometido y tecnología de punta que nos permite optimizar cada etapa del proceso logístico.

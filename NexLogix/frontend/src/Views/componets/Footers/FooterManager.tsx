@@ -9,14 +9,14 @@ const FooterGeneralManager = () => {
             <div className="col-md-4">
               <div className="footer-card">
                 <Link className="footer-link" to="/Manager/ubicacion">
-                  Estamos ubicados en:
+                  Estamos ubicados en
                 </Link>
               </div>
             </div>
             <div className="col-md-4">
               <div className="footer-card">
                 <Link className="footer-link" to="/Manager/acerca_de">
-                  Acerca de:
+                  Acerca de
                 </Link>
               </div>
             </div>
