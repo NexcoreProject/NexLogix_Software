@@ -27,7 +27,7 @@ html, body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     overflow: hidden;
     margin-top: 1rem;
-    border: 1px solid #3a4a6a;
+    border: none;
 }
 .table.custom-table {
     margin-bottom: 0;

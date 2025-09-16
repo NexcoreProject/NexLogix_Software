@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { 
     IApiResponse, 
     IUsuario, 
@@ -8,67 +7,118 @@ import {
     IEstado,
     IPuesto 
 } from '../../models/Interfaces/IGestionUsuarios';
+import axios from 'axios';
+import { axiosInstance } from '../axiosConfig';
 
-const BASE_URL = 'http://127.0.0.1:8000/api';
+// Helper para formatear errores de Axios evitando any
+function formatAxiosError<T>(error: unknown, fallbackMessage: string, fallbackData: T, fallbackStatus?: number): IApiResponse<T> {
+    if (axios.isAxiosError(error)) {
+        const status = error.response?.status ?? fallbackStatus;
+        let message = fallbackMessage;
+        const data = error.response?.data as unknown;
+        if (typeof data === 'object' && data !== null && 'message' in data) {
+            const maybe = (data as { message?: unknown }).message;
+            if (typeof maybe === 'string') {
+                message = maybe;
+            }
+        }
+        return {
+            success: false,
+            message,
+            data: fallbackData,
+            status
+        } as IApiResponse<T>;
+    }
+    return {
+        success: false,
+        message: fallbackMessage,
+        data: fallbackData,
+        status: fallbackStatus
+    } as IApiResponse<T>;
+}
 
 // Servicio para Usuarios
 export const UsuariosService = {
-    getAll: (): Promise<IApiResponse<IUsuario[]>> => {
-        return axios.get(`${BASE_URL}/gestion_usuarios`)
-            .then(response => response.data);
+    async getAll(): Promise<IApiResponse<IUsuario[]>> {
+        try {
+            const response = await axiosInstance.get('/gestion_usuarios');
+            return response.data as IApiResponse<IUsuario[]>;
+        } catch (error: unknown) {
+            return formatAxiosError<IUsuario[]>(error, 'Error al listar usuarios', []);
+        }
     },
 
-    getById: (value: string): Promise<IApiResponse<IUsuario>> => {
-        return axios.get(`${BASE_URL}/gestion_usuarios/${value}`)
-            .then(response => response.data)
-            .catch(error => {
-                // Manejo específico para usuario no encontrado
-                if (error.response?.status === 404) {
-                    return {
-                        success: false,
-                        message: 'Usuario no encontrado',
-                        data: null
-                    };
-                }
-                // Otros errores del servidor
+    async getById(value: string): Promise<IApiResponse<IUsuario>> {
+        try {
+            const response = await axiosInstance.get(`/gestion_usuarios/${value}`);
+            return response.data as IApiResponse<IUsuario>;
+        } catch (error: unknown) {
+            if (axios.isAxiosError(error) && error.response?.status === 404) {
                 return {
                     success: false,
-                    message: error.response?.data?.message || 'Error al buscar usuario',
-                    data: null
-                };
-            });
+                    message: 'Usuario no encontrado',
+                    data: null as unknown as IUsuario,
+                    status: 404
+                } as IApiResponse<IUsuario>;
+            }
+            return formatAxiosError<IUsuario>(error, 'Error al buscar usuario', null as unknown as IUsuario);
+        }
     },
 
-    create: (usuario: ICreateUsuarioDTO): Promise<IApiResponse<IUsuario>> => {
-        return axios.post(`${BASE_URL}/gestion_usuarios`, usuario)
-            .then(response => response.data);
+    async create(usuario: ICreateUsuarioDTO): Promise<IApiResponse<IUsuario>> {
+        try {
+            const response = await axiosInstance.post('/gestion_usuarios', usuario);
+            return response.data as IApiResponse<IUsuario>;
+        } catch (error: unknown) {
+            return formatAxiosError<IUsuario>(error, 'Error al crear usuario', null as unknown as IUsuario);
+        }
     },
 
-    update: (id: number, usuario: IUpdateUsuarioDTO): Promise<IApiResponse<IUsuario>> => {
-        return axios.patch(`${BASE_URL}/gestion_usuarios/${id}`, usuario)
-            .then(response => response.data);
+    async update(id: number, usuario: IUpdateUsuarioDTO): Promise<IApiResponse<IUsuario>> {
+        try {
+            const response = await axiosInstance.patch(`/gestion_usuarios/${id}`, usuario);
+            return response.data as IApiResponse<IUsuario>;
+        } catch (error: unknown) {
+            return formatAxiosError<IUsuario>(error, 'Error al actualizar usuario', null as unknown as IUsuario);
+        }
     },
 
-    delete: (id: number): Promise<IApiResponse<null>> => {
-        return axios.delete(`${BASE_URL}/gestion_usuarios/${id}`)
-            .then(response => response.data);
+    async delete(id: number): Promise<IApiResponse<null>> {
+        try {
+            const response = await axiosInstance.delete(`/gestion_usuarios/${id}`);
+            return response.data as IApiResponse<null>;
+        } catch (error: unknown) {
+            return formatAxiosError<null>(error, 'Error al eliminar usuario', null);
+        }
     }
 };
 
 // Servicios para Catálogos
 export const CatalogosService = {
-    getRoles: (): Promise<IApiResponse<IRol[]>> => {
-        return axios.get(`${BASE_URL}/gestion_roles`)
-            .then(response => response.data);
+    async getRoles(): Promise<IApiResponse<IRol[]>> {
+        try {
+            const response = await axiosInstance.get('/gestion_roles');
+            return response.data as IApiResponse<IRol[]>;
+        } catch (error: unknown) {
+            return formatAxiosError<IRol[]>(error, 'Error al listar roles', []);
+        }
     },
 
-    getPuestos: (): Promise<IApiResponse<IPuesto[]>> => {
-        return axios.get(`${BASE_URL}/gestion_puestos`)
-            .then(response => response.data);
+    async getPuestos(): Promise<IApiResponse<IPuesto[]>> {
+        try {
+            const response = await axiosInstance.get('/gestion_puestos');
+            return response.data as IApiResponse<IPuesto[]>;
+        } catch (error: unknown) {
+            return formatAxiosError<IPuesto[]>(error, 'Error al listar puestos', []);
+        }
     },
 
-    getEstados: (): Promise<IApiResponse<IEstado[]>> => {
-        return axios.get(`${BASE_URL}/gestion_estados`)
-            .then(response => response.data);
+    async getEstados(): Promise<IApiResponse<IEstado[]>> {
+        try {
+            const response = await axiosInstance.get('/gestion_estados');
+            return response.data as IApiResponse<IEstado[]>;
+        } catch (error: unknown) {
+            return formatAxiosError<IEstado[]>(error, 'Error al listar estados', []);
+        }
     }
 };

@@ -116,3 +116,11 @@
     font-size: 0.9em; /* Aumenta ligeramente el tamaño de fuente */
   }
 }
+
+/* Eliminación específica de bordes para contenedores de áreas */
+.areas_container .custom-table-wrapper,
+.areas_container .card,
+.areas_container .container {
+  border: none !important;
+  outline: none !important;
+}

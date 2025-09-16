@@ -10,6 +10,13 @@ body {
     color: #ffffff;
 }
 
+/* Contenedor principal que incluye navbar y contenido */
+.main-content-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
 /* Navbar o barra superior */
 .navbar {
     background-color: #161625;
@@ -141,6 +148,73 @@ body {
     background-color: #232c42; /* Cambia el color de fondo al pasar el mouse */
 }
 
+/* Estilos para elementos activos */
+.nav-item a.active {
+    background-color: #1E1E3F !important; /* Color azul oscuro personalizado */
+    color: #fff !important;
+    border-radius: 8px !important;
+    font-weight: 600;
+}
+
+/* Estilo para el botón de inicio cuando está activo */
+.btn.active {
+    background-color: #1E1E3F !important;
+    border-color: #1E1E3F !important;
+    color: #fff !important;
+    font-weight: 600;
+}
+
+/* Estilos para enlaces padre de submenú cuando están activos */
+.nav-link.active[data-bs-toggle="collapse"] {
+    background-color: #1E1E3F !important; /* Mismo color para menú padre activo */
+    color: #fff !important;
+    border-radius: 8px !important;
+    font-weight: 600;
+}
+
+/* Mantener el color activo al hacer hover sobre elemento activo */
+.nav-item a.active:hover {
+    background-color: #1E1E3F !important; /* Mantener el mismo color en hover */
+}
+
+.btn.active:hover {
+    background-color: #1E1E3F !important;
+    border-color: #1E1E3F !important;
+}
+
+/* Remover cualquier color azul no deseado y mantener estado activo */
+.nav-item a:focus,
+.nav-item a:active,
+.btn:focus,
+.btn:active {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Asegurar que los enlaces activos mantengan su color */
+.nav-item a.active:focus,
+.nav-item a.active:active,
+.btn.active:focus,
+.btn.active:active {
+    background-color: #1E1E3F !important;
+    border-color: #1E1E3F !important;
+    color: #fff !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Eliminar cualquier estilo de Bootstrap que pueda aplicar azul */
+.nav-link:focus,
+.nav-link:hover {
+    color: inherit !important;
+}
+
+.nav-link.active:focus,
+.nav-link.active:hover {
+    background-color: #1E1E3F !important;
+    color: #fff !important;
+}
+
 /* Ajustes del espacio de páginas anidadas o enrutadas */
 main {
     margin-left: 0px; /* Ajusta según el ancho del sidebar */
@@ -170,4 +244,27 @@ main {
   .sidebar-resize-handle {
     display: none !important; /* Oculta el manejador en modo compacto */
   }
+}
+
+/* Estilos para sticky footer - aplicar solo en los perfiles */
+.profile-layout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-layout .container-fluid {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-layout .container-fluid .row {
+    flex: 1;
+    display: flex;
+}
+
+/* El contenido principal debe ocupar todo el espacio disponible */
+.profile-layout main {
+    flex: 1;
 }

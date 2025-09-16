@@ -241,11 +241,9 @@ const Rutas = () => {
         </div>
       </div>
 
-      {/* Contenido */}
-      <div className="card">
-        <div className="card-body">
-          {/* Búsqueda y botones */}
-          <div className="d-flex justify-content-between mb-3">
+      {/* Contenido sin card */}
+      {/* Búsqueda y botones */}
+      <div className="d-flex justify-content-between mb-3">
             <div className="d-flex gap-2" style={{ flex: 1 }}>
               <input
                 type="text"
@@ -377,8 +375,6 @@ const Rutas = () => {
               </table>
             </div>
           )}
-        </div>
-      </div>
 
       {/* Modal de Eliminar */}
       {showDeleteModal && selectedRuta && (

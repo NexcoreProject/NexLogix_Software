@@ -1,12 +1,11 @@
-main {
- flex: 2 0; /* Empuja el footer hacia abajo */
-}
-/* Footer */
+/* Footer sticky al final de la página */
 .footer {
-  margin: 0;
+  margin-top: auto; /* Esto empuja el footer al final */
+  margin-bottom: 0;
   padding: 0.25rem 0 0.1rem 0; /* Espacio superior e inferior mínimo */
   background-color: #161625;
   color: white;
+  flex-shrink: 0; /* Evita que el footer se comprima */
 }
 
 .footer a:hover, 

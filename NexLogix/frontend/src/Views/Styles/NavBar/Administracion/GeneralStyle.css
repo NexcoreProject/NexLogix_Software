@@ -27,7 +27,7 @@ html, body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     overflow: hidden;
     margin-top: 1rem;
-    border: 1px solid #3a4a6a;
+    border: none;
 }
 .table.custom-table {
     margin-bottom: 0;
@@ -163,4 +163,73 @@ html, body {
     .crear-conductor-form {
         grid-template-columns: 1fr;
     }
+}
+
+/* Eliminación completa de bordes para el contenedor de áreas */
+.areas_container .card {
+    border: none !important;
+    overflow: hidden !important; /* Esto oculta las puntas blancas */
+    background-color: #161625 !important;
+}
+
+.areas_container .custom-table-wrapper {
+    border: none !important;
+    overflow: hidden !important; /* Asegura que la tabla no sobresalga */
+    border-radius: 12px !important;
+    background-color: #232c42 !important;
+}
+
+.areas_container .container {
+    border: none !important;
+}
+
+.areas_container * {
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Eliminación específica de puntas blancas en las esquinas */
+.areas_container .card-body {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    background-color: #161625 !important;
+    padding: 0 !important;
+}
+
+.areas_container .table {
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    margin-bottom: 0 !important;
+    background-color: transparent !important;
+}
+
+.areas_container .table thead th:first-child {
+    border-top-left-radius: 12px !important;
+    background-color: #2f3d5c !important;
+}
+
+.areas_container .table thead th:last-child {
+    border-top-right-radius: 12px !important;
+    background-color: #2f3d5c !important;
+}
+
+.areas_container .table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 12px !important;
+    background-color: #232c42 !important;
+}
+
+.areas_container .table tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 12px !important;
+    background-color: #232c42 !important;
+}
+
+/* Forzar colores de fondo en todas las celdas para evitar blancos */
+.areas_container .table thead th {
+    background-color: #2f3d5c !important;
+    border: none !important;
+}
+
+.areas_container .table tbody td {
+    background-color: #232c42 !important;
+    border: none !important;
 }

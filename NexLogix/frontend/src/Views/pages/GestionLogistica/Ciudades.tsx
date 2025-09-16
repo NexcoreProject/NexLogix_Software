@@ -85,19 +85,14 @@ const Ciudades: React.FC = () => {
           <div className="card-body">
             <div className="d-flex justify-content-between mb-4 align-items-center">
               <div className="d-flex align-items-center" style={{ flex: 1, minWidth: 0 }}>
-                <div className="input-group w-100">
-                  <span className="input-group-text px-2">
-                    <i className="bi bi-search" />
-                  </span>
                   <input
                     type="text"
                     className="form-control"
                     placeholder="Buscar ciudad por ID..."
                     value={ciudadesState.searchId}
                     onChange={handleSearchChange}
-                    style={{ minWidth: 0 }}
+                    style={{ minWidth: 0, borderRadius: '0.5rem' }}
                   />
-                </div>
                 <div className="d-flex gap-2 ms-2">
                   <button
                     className="btn btn-primary"
@@ -129,7 +124,7 @@ const Ciudades: React.FC = () => {
               {ciudadesState.loading ? (
                 <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 120 }}>
                   <span className="spinner-border text-primary me-2" role="status" aria-hidden="true"></span>
-                  <span className="fw-bold">Cargando...</span>
+                  <span className="fw-bold" style={{ color: 'white' }}>Cargando...</span>
                 </div>
               ) : (
                 <table className="table custom-table">

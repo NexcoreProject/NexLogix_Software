@@ -21,24 +21,26 @@ export interface IRol {
 }
 
 export interface IEstado {
-    idEstado: number;
-    nombreEstado: string;
+    idestado: number;
+    estado: string;
     descripcionEstado: string;
 }
 
 // Interfaz principal para Usuario que coincide exactamente con el backend
 export interface IUsuario {
-    idUsuario: number;
-    documento: string;
-    nombre: string;
+    idusuarios: number;
+    documentoIdentidad: string;
+    nombreCompleto: string;
     email: string;
-    telefono: string;
+    numContacto: string;
+    direccionResidencia: string;
+    fechaCreacion: string;
+    idestado: number;
     idRole: number;
-    idPuesto: number;
-    idEstado: number;
-    rol?: IRol;
-    puesto?: IPuesto;
-    estado?: IEstado;
+    idPuestos: number;
+    estado: IEstado;
+    roles: IRol;
+    puestos: IPuesto;
 }
 
 // Respuesta de la API para operaciones de usuarios
@@ -48,4 +50,37 @@ export interface IUsuarioApiResponse {
     message?: string;
     data: IUsuario[] | IUsuario;
     status: number;
+}
+
+// DTO para crear usuarios
+export interface ICreateUsuarioDTO {
+    documentoIdentidad: string;
+    nombreCompleto: string;
+    email: string;
+    numContacto: string;
+    direccionResidencia: string;
+    contrasena: string;
+    idestado: number;
+    idRole: number;
+    idPuestos: number;
+}
+
+// DTO para actualizar usuarios
+export interface IUpdateUsuarioDTO {
+    documentoIdentidad: string;
+    nombreCompleto: string;
+    email: string;
+    numContacto: string;
+    direccionResidencia: string;
+    idestado: number;
+    idRole: number;
+    idPuestos: number;
+}
+
+// Respuesta genérica de la API
+export interface IApiResponse<T> {
+    success: boolean;
+    message: string;
+    data: T;
+    status?: number;
 }

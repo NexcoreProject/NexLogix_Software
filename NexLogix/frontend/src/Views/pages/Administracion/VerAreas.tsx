@@ -113,8 +113,8 @@ const VerAreas: React.FC = () => {
   };
 
   return (
-    <div className='areas_container'>
-      <div className="container mt-4">
+    <div className='areas_container' style={{ border: 'none', outline: 'none' }}>
+      <div className="container mt-4" style={{ border: 'none', outline: 'none' }}>
         {/* Barra de búsqueda y botones */}
         <div className="header-azul mb-3">
           <div className="d-flex align-items-center p-3">
@@ -122,23 +122,17 @@ const VerAreas: React.FC = () => {
             <h2 className="mb-0 text-white">Gestión de Áreas</h2>
           </div>
         </div>
-        <div className="card">
-          <div className="card-body">
-            <div className="d-flex justify-content-between mb-4 align-items-center">
-              <div className="d-flex align-items-center" style={{ flex: 1, minWidth: 0 }}>
-                <div className="input-group w-100">
-                  <span className="input-group-text px-2">
-                    <i className="bi bi-search" />
-                  </span>
+        {/* Contenido principal sin card */}
+        <div className="d-flex justify-content-between mb-4 align-items-center">
+          <div className="d-flex align-items-center" style={{ flex: 1, minWidth: 0 }}>
                   <input
                     type="text"
                     className="form-control"
                     placeholder="Buscar área por ID..."
                     value={searchId}
                     onChange={e => setSearchId(e.target.value)}
-                    style={{ minWidth: 0 }}
+                    style={{ minWidth: 0, borderRadius: '0.5rem' }}
                   />
-                </div>
                 <div className="d-flex gap-2 ms-2">
                   <button className="btn btn-primary" style={{ minWidth: 140 }} onClick={handleSearch}>
                     Buscar por ID
@@ -152,8 +146,8 @@ const VerAreas: React.FC = () => {
                 </div>
               </div>
             </div>
-            <div className="custom-table-wrapper">
-              <table className="table custom-table">
+            <div className="custom-table-wrapper" style={{ border: 'none', outline: 'none', overflow: 'hidden', borderRadius: '12px', backgroundColor: '#232c42', boxShadow: 'none' }}>
+              <table className="table custom-table" style={{ borderRadius: '12px', overflow: 'hidden', marginBottom: '0', backgroundColor: 'transparent' }}>
                 <thead>
                   <tr>
                     <th>ID</th>
@@ -195,8 +189,6 @@ const VerAreas: React.FC = () => {
                 </tbody>
               </table>
             </div>
-          </div>
-        </div>
 
         {/* Modal para crear área */}
         {showCreateModal && (
