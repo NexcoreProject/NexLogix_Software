@@ -10,6 +10,15 @@ const HomeManager = () => {
   const [error, setError] = useState<string>('');
   const navigate = useNavigate();
 
+  // Utilidad visual: iniciales del usuario (solo UI)
+  const getInitials = (name?: string) => {
+    if (!name) return 'NM';
+    const parts = name.trim().split(/\s+/);
+    const first = parts[0]?.[0] ?? '';
+    const last = parts.length > 1 ? parts[parts.length - 1][0] : '';
+    return (first + last).toUpperCase();
+  };
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -62,86 +71,106 @@ const HomeManager = () => {
             <div>{error}</div>
           </div>
         )}
+
         {profile ? (
-          <div className=" border-0 animate__animated animate__fadeInUp">
-
-            <div className="card-header rounded-lg text-white text-center py-4 ">
-              <h1 className="mb-0 display-4 fw-bold">
-                Bienvenid@ a <span className="text-warning">NEXLOGIX</span>
+          <div className="animate__animated animate__fadeInUp">
+            {/* Hero superior */}
+            <section className="home-hero">
+              <h1 className="hero-title">
+                Le damos la bienvenida a <span className="brand-accent">NEXLOGIX</span>
               </h1>
-              <p className="mt-2 text-light">Tu solución integral para logística</p>
-            </div>
+              <p className="hero-subtitle">Tu solución integral para logística</p>
+            </section>
 
-            <div className="card-body p-5">
-              <h4 className="mb-4 text-primary fw-bold">Información del Empleado</h4>
-              <div className="row">
-                <div className="col-md-6">
-                  <ul className="list-group list-group-flush">
-                    <li className="list-group-item d-flex justify-content-between align-items-center py-3">
-                      <strong>ID usuario:</strong>
-                      <span className="badge bg-primary text-white rounded-pill">{profile.ID}</span>
-                    </li>
-                    <li className="list-group-item d-flex justify-content-between align-items-center py-3">
-                      <strong>Cédula de Ciudadanía:</strong>
-                      <span>{profile.documentoIdentidad}</span>
-                    </li>
-                    <li className="list-group-item d-flex justify-content-between align-items-center py-3">
-                      <strong>Nombre completo:</strong>
-                      <span>{profile.nombreCompleto}</span>
-                    </li>
-                    <li className="list-group-item d-flex justify-content-between align-items-center py-3">
-                      <strong>Email:</strong>
-                      <span>{profile.email}</span>
-                    </li>
-                  </ul>
-                </div>
-                <div className="col-md-6">
-                  <ul className="list-group list-group-flush">
-                    <li className="list-group-item d-flex justify-content-between align-items-center py-3">
-                      <strong>Teléfono:</strong>
-                      <span>{profile.numContacto}</span>
-                    </li>
-                    <li className="list-group-item d-flex justify-content-between align-items-center py-3">
-                      <strong>Dirección:</strong>
-                      <span>{profile.direccionResidencia}</span>
-                    </li>
-                    <li className="list-group-item d-flex justify-content-between align-items-center py-3">
-                      <strong>Fecha de Creación de la cuenta:</strong>
-                      <span>{new Date(profile.fechaCreacion).toLocaleDateString()}</span>
-                    </li>
-                  </ul>
+            {/* Resumen de perfil */}
+            <section className="profile-card glass-card">
+              <div className="avatar" aria-hidden="true">{getInitials(profile?.nombreCompleto)}</div>
+              <div className="profile-main">
+                <h2 className="profile-name">{profile?.nombreCompleto}</h2>
+                <p className="profile-email">{profile?.email}</p>
+                <div className="kpi-chips">
+                  <span className="chip">
+                    <i className="bi bi-hash me-1"></i>ID {profile?.ID}
+                  </span>
+                  {profile?.Role?.nombreRole && (
+                    <span className="chip">
+                      <i className="bi bi-shield-lock me-1"></i>{profile.Role.nombreRole}
+                    </span>
+                  )}
+                  {profile?.Puesto?.nombrePuesto && (
+                    <span className="chip">
+                      <i className="bi bi-briefcase me-1"></i>{profile.Puesto.nombrePuesto}
+                    </span>
+                  )}
                 </div>
               </div>
+            </section>
 
-              
-              <hr className="my-4" />
-              <h5 className="mb-3 text-primary">Detalles del Rol</h5>
-              <ul className="list-group list-group-flush">
-                <li className="list-group-item py-3">
-                  <strong>Rol:</strong> {profile.Role?.nombreRole}
-                  <div className="mt-2">
-                    <strong>Descripción:</strong> {profile.Role?.descripcionRole}
+            {/* Información detallada */}
+            <section className="section-block">
+              <h3 className="section-title">Información del empleado</h3>
+              <div className="info-grid">
+                <div className="info-tile">
+                  <div className="info-icon bg1"><i className="bi bi-person-badge"></i></div>
+                  <div className="info-meta">
+                    <span className="label">Documento</span>
+                    <span className="value">{profile.documentoIdentidad}</span>
                   </div>
-                  <div>
-                    <strong>Fecha Asignación:</strong> {profile.Role?.fechaAsignacionDelRole}
+                </div>
+
+                <div className="info-tile">
+                  <div className="info-icon bg2"><i className="bi bi-telephone"></i></div>
+                  <div className="info-meta">
+                    <span className="label">Teléfono</span>
+                    <span className="value">{profile.numContacto}</span>
                   </div>
-                </li>
-                <li className="list-group-item py-3">
-                  <strong>Puesto:</strong> {profile.Puesto?.nombrePuesto}
-                  <div className="mt-2">
-                    <strong>Descripción:</strong> {profile.Puesto?.descripcionPuesto}
+                </div>
+
+                <div className="info-tile">
+                  <div className="info-icon bg3"><i className="bi bi-geo-alt"></i></div>
+                  <div className="info-meta">
+                    <span className="label">Dirección</span>
+                    <span className="value">{profile.direccionResidencia}</span>
                   </div>
-                </li>
-              </ul>
-            </div>
-            <div className="card-footer text-center py-3">
-              <small className="text-muted">NEXLOGIX - Optimizando tu logística</small>
-            </div>
+                </div>
+
+                <div className="info-tile">
+                  <div className="info-icon bg4"><i className="bi bi-calendar3"></i></div>
+                  <div className="info-meta">
+                    <span className="label">Creación de cuenta</span>
+                    <span className="value">{new Date(profile.fechaCreacion).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="section-block">
+              <h3 className="section-title">Rol y puesto</h3>
+              <div className="info-grid two-cols">
+                <div className="info-panel glass-card">
+                  <div className="panel-header"><i className="bi bi-shield-check me-2"></i>Rol asignado</div>
+                  <div className="panel-body">
+                    <div className="row-item"><span>Rol</span><strong>{profile.Role?.nombreRole || '—'}</strong></div>
+                    <div className="row-item"><span>Descripción</span><span className="muted">{profile.Role?.descripcionRole || '—'}</span></div>
+                    <div className="row-item"><span>Fecha asignación</span><span>{profile.Role?.fechaAsignacionDelRole || '—'}</span></div>
+                  </div>
+                </div>
+                <div className="info-panel glass-card">
+                  <div className="panel-header"><i className="bi bi-briefcase me-2"></i>Puesto</div>
+                  <div className="panel-body">
+                    <div className="row-item"><span>Puesto</span><strong>{profile.Puesto?.nombrePuesto || '—'}</strong></div>
+                    <div className="row-item"><span>Descripción</span><span className="muted">{profile.Puesto?.descripcionPuesto || '—'}</span></div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Nota de pie retirada por solicitud */}
           </div>
         ) : (
           !error && (
             <div className="welcome-text">
-              <h1 className="display-4 fw-bold text-primary">Bienvenido a <span className="text-warning">NexLogix Manager</span></h1>
+              <h1 className="display-5 fw-bold text-primary">Bienvenido a <span className="text-warning">NexLogix Manager</span></h1>
               <p className="lead text-muted">Gestiona tu logística con eficiencia y precisión</p>
             </div>
           )

@@ -24,7 +24,7 @@ const FooterGeneralManager = () => {
           <div className="row">
             <div className="col text-center">
               <p className="footer-copyright">
-                Derechos reservados © 2025
+                NEXLOGIX © · Optimizando tu logística
               </p>
             </div>
           </div>

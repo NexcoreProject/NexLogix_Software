@@ -1,75 +1,132 @@
+:root {
+  --bg-1: #161625;   /* fondo base */
+  --bg-2: #1b2136;   /* variación oscura */
+  --bg-3: #232c42;   /* paneles */
+  --line: #3a4a6a;   /* bordes */
+  --primary: #627bb2; /* acento suave */
+  --brand: #ffc107;   /* amarillo Nexlogix (text-warning) */
+  --text: #e6e6e6;
+  --muted: #bfc6d8;
+}
+
 /* Contenedor principal */
 .home_manager_container {
-  background-color: #161625;
+  /* Capa de desvanecido superior para que el degradado "aparezca" suave */
+  background:
+    linear-gradient(180deg,
+      rgba(22,22,37,0.00) 0%,
+      rgba(22,22,37,0.28) 14%,
+      rgba(22,22,37,0.55) 28%,
+      rgba(22,22,37,0.85) 42%,
+      rgba(22,22,37,1.00) 56%),
+    /* Gradientes radiales suavizados (faded) */
+    radial-gradient(1200px 600px at 10% -10%,
+      rgba(36,48,85,0.00) 0%,
+      rgba(36,48,85,0.20) 22%,
+      rgba(36,48,85,0.38) 38%,
+      rgba(36,48,85,0.00) 68%),
+    radial-gradient(1000px 500px at 110% 10%,
+      rgba(30,39,70,0.00) 0%,
+      rgba(30,39,70,0.18) 22%,
+      rgba(30,39,70,0.34) 38%,
+      rgba(30,39,70,0.00) 66%),
+    var(--bg-1);
   min-height: 100vh;
-  padding: 0;
+  padding: 4px 0 0px 0;
+  color: var(--text);
+  border-top-left-radius: 16px; /* Ajusta el valor según el grado de redondeo deseado */
+  border-top-right-radius: 16px; /* Ajusta el valor según el grado de redondeo deseado */
 }
 
-/* Tarjeta principal */
-.card,
-.home_manager_container > .container > .border-0 {
-  background-color: #232c42;
+/* HERO */
+.home-hero {
+  background: linear-gradient(180deg, rgba(35,44,66,0.72) 0%, rgba(35,44,66,0.18) 100%);
+  border: 1px solid rgba(161, 182, 220, 0.25); /* borde superior visible */
+  outline: 1px solid rgba(58,74,106,0.35); /* línea exterior sutil por encima */
+  border-radius: 20px; /* esquinas más redondeadas */
+  padding: 26px 22px; /* menos espacio arriba/abajo */
+  margin-top: 10px;   /* margen superior original */
+  margin-bottom: 14px;/* menor margen inferior */
+  text-align: center;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 12px 28px rgba(0,0,0,0.25);
+}
+.hero-title {
+  margin: 0;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.brand-accent { color: var(--brand); }
+.hero-subtitle { color: var(--muted); margin-top: 8px; }
+
+/* Tarjetas translúcidas */
+.glass-card {
+  background: linear-gradient(180deg, rgba(35,44,66,0.65) 0%, rgba(35,44,66,0.45) 100%);
+  border: 1px solid rgba(58,74,106,0.5);
+  backdrop-filter: blur(6px);
   border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(34, 44, 66, 0.18);
-  border: 1px solid #3a4a6a;
-  overflow: hidden;
-  margin-top: 1rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
 }
 
-/* Cabecera de la tarjeta */
-.card-header,
-.home_manager_container .card-header {
-  background: #2f3d5c;
-  color: #ffffff;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-  padding: 24px 32px;
-  border-bottom: 1px solid #3a4a6a;
+/* Tarjeta de perfil */
+.profile-card {
+  display: grid;
+  grid-template-columns: 84px 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 22px;
+  margin-top: 18px;
+}
+.avatar {
+  width: 84px; height: 84px; border-radius: 16px;
+  display: grid; place-items: center; font-weight: 800; font-size: 28px;
+  color: #fff; background: linear-gradient(135deg, #2f3d5c 0%, #445b85 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.profile-name { margin: 0; font-size: 22px; font-weight: 700; }
+.profile-email { margin: 2px 0 10px; color: var(--muted); font-size: 14px; }
+
+.kpi-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  background: #1b2136;
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 6px 10px; border-radius: 999px; font-size: 13px;
 }
 
-.card-header .text-light,
-.home_manager_container .card-header .text-light {
-  color: #cccccc !important;
+/* Secciones */
+.section-block { margin-top: 26px; }
+.section-title { color: var(--primary); margin: 0 0 14px 2px; font-weight: 700; }
+
+/* Grid de información */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
 }
+.info-grid.two-cols { grid-template-columns: repeat(2, 1fr); }
 
-/* Cuerpo de la tarjeta */
-.card-body,
-.home_manager_container .card-body {
-  background-color: #232c42;
-  color: #e0e0e0;
-  padding: 32px 32px;
+.info-tile {
+  display: flex; gap: 12px; align-items: center;
+  background: #1a2237;
+  border: 1px solid rgba(58,74,106,0.45);
+  border-radius: 12px; padding: 14px 12px;
 }
+.info-icon { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; color: #fff; }
+.info-icon.bg1 { background: #31406a; }
+.info-icon.bg2 { background: #3d4e6b; }
+.info-icon.bg3 { background: #445b85; }
+.info-icon.bg4 { background: #2f3d5c; }
+.info-meta .label { color: var(--muted); font-size: 12px; letter-spacing: .2px; }
+.info-meta .value { font-weight: 700; margin-left: 8px; } /* separación entre label y valor */
 
-.card-body h4, .card-body h5,
-.home_manager_container .card-body h4,
-.home_manager_container .card-body h5 {
-  color: #627bb2;
-  margin-bottom: 18px;
-}
+/* Paneles de rol y puesto */
+.info-panel { padding: 16px; }
+.panel-header { font-weight: 700; color: var(--text); margin-bottom: 10px; }
+.panel-body { display: grid; gap: 8px; }
+.row-item { display: flex; justify-content: space-between; gap: 12px; }
+.row-item .muted { color: var(--muted); }
 
-/* Listas dentro de la tarjeta */
-.list-group-item {
-  background-color: #161624 !important; /* Color morado claro fijo */
-  color: #ffffff !important; /* Texto oscuro para contraste */
-  border-color: #161624 !important;
-  padding: 16px 20px;
-  border-radius: 10px !important; /* Bordes redondeados completos */
-  margin-bottom: 10px;
-  font-size: 1.04em;
-}
-
-.list-group-item strong {
-  color: #ffffff !important; /* Texto blanco para que se vea bien sobre fondo oscuro */
-
-
-/* Badges */
-.badge.bg-primary {
-  background-color: #31406a !important;
-  color: #fff !important;
-  font-size: 1em;
-  padding: 0.5em 1em;
-  border-radius: 12px;
-}
+.page-footer-note { margin: 22px 0 8px; }
 
 /* Alertas */
 .alert-danger {
@@ -86,23 +143,6 @@
   font-size: 1.08em;
 }
 
-/* Footer de la tarjeta */
-.card-footer,
-.home_manager_container .card-footer {
-  background-color: #1a1a2b;
-  color: #cccccc;
-  border-bottom-left-radius: 16px;
-  border-bottom-right-radius: 16px;
-  padding: 18px 30px;
-  border-top: 1px solid #3a4a6a;
-}
-
-/* Textos secundarios */
-.text-muted,
-.welcome-text .text-muted {
-  color: #cccccc !important;
-}
-
 /* Loading spinner */
 .loading-container {
   min-height: 60vh;
@@ -111,25 +151,14 @@
   justify-content: center;
 }
 
-/* Responsividad */
-@media (max-width: 768px) {
-  .home_manager_container {
-    padding: 10px 0;
-  }
-  .card-body,
-  .home_manager_container .card-body {
-    padding: 18px 8px;
-  }
-  .card-header, .card-footer,
-  .home_manager_container .card-header,
-  .home_manager_container .card-footer {
-    padding: 12px 8px;
-  }
-  .list-group-item {
-    background-color: #86aaf9 !important; /* Mantenemos el color morado claro en móviles */
-    color: #161625 !important; /* Texto oscuro para contraste */
-    padding: 10px 8px;
-    font-size: 0.98em;
-  }
+/* Responsive */
+@media (max-width: 992px) {
+  .info-grid { grid-template-columns: repeat(2, 1fr); }
+  .info-grid.two-cols { grid-template-columns: 1fr; }
 }
+
+@media (max-width: 576px) {
+  .profile-card { grid-template-columns: 64px 1fr; }
+  .avatar { width: 64px; height: 64px; border-radius: 12px; font-size: 22px; }
+  .info-grid { grid-template-columns: 1fr; }
 }
