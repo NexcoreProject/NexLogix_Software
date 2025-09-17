@@ -1,0 +1,416 @@
+/* Modern Sidebar Styles - NexLogix */
+:root {
+  --nexlogix-bg-1: #161625;
+  --nexlogix-bg-2: #1b2136;
+  --nexlogix-bg-3: #232c42;
+  --nexlogix-line: #3a4a6a;
+  --nexlogix-primary: #627bb2;
+  --nexlogix-brand: #ffc107;
+  --nexlogix-text: #e6e6e6;
+  --nexlogix-muted: #bfc6d8;
+  --nexlogix-accent: #445b85;
+  --nexlogix-hover: #2f3d5c;
+}
+
+/* Main Content Area */
+.modern-main-content {
+  min-height: calc(100vh - 60px);
+  padding: 0;
+  position: relative;
+}
+
+.main-content-wrapper {
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Sidebar Container */
+.modern-sidebar {
+  background: linear-gradient(180deg, 
+    rgba(22,22,37,0.0) 0%,
+    rgba(22,22,37,0.3) 5%,
+    rgba(22,22,37,1.0) 15%,
+    rgba(22,22,37,1.0) 85%, 
+    rgba(22,22,37,0.3) 95%,
+    rgba(22,22,37,0.0) 100%);
+  backdrop-filter: blur(10px);
+  min-height: calc(100vh - 60px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Sombra lateral derecha con fade arriba y abajo */
+.modern-sidebar::after {
+  content: '';
+  position: absolute;
+  top: 10%; /* CAMBIAR ESTE VALOR: Donde empieza el fade de arriba (0% = desde arriba total) */
+  right: -15px; /* CAMBIAR ESTE VALOR: Qué tan lejos se extiende la sombra hacia la derecha */
+  bottom: 10%; /* CAMBIAR ESTE VALOR: Donde empieza el fade de abajo (0% = hasta abajo total) */
+  width: 25px; /* CAMBIAR ESTE VALOR: Qué tan ancha es la sombra (más ancho = sombra más grande) */
+  background: linear-gradient(to right, 
+    transparent 0%, 
+    rgba(0,0,0,0.15) 60%, /* CAMBIAR ESTE VALOR: Intensidad de la sombra (0.15 = 15% opacidad) */
+    rgba(0,0,0,0.05) 100%
+  );
+  /* Fade vertical para que no se vea brusco arriba y abajo */
+  mask: linear-gradient(to bottom, 
+    transparent 0%, 
+    black 20%, /* CAMBIAR ESTE VALOR: Qué tan rápido aparece el fade de arriba */
+    black 80%, /* CAMBIAR ESTE VALOR: Qué tan rápido desaparece el fade de abajo */
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.modern-sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    var(--nexlogix-brand) 20%, 
+    var(--nexlogix-primary) 80%, 
+    transparent 100%);
+  opacity: 0.5;
+}
+
+/* Sidebar Header */
+.sidebar-header {
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid rgba(58,74,106,0.2);
+  background: linear-gradient(135deg, 
+    rgba(35,44,66,0.4) 0%, 
+    rgba(22,22,37,0.6) 100%);
+}
+
+.sidebar-title {
+  color: var(--nexlogix-text);
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-title i {
+  color: var(--nexlogix-brand);
+  font-size: 18px;
+}
+
+/* Navigation Container */
+.modern-nav {
+  padding: 24px 12px 16px;
+  gap: 8px;
+}
+
+/* Navigation Item Wrapper */
+.nav-item-wrapper {
+  margin-bottom: 6px;
+}
+
+/* Modern Navigation Items */
+.modern-nav-item {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  color: var(--nexlogix-text);
+  text-decoration: none;
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  background: rgba(35,44,66,0.2);
+  border: 1px solid rgba(58,74,106,0.15);
+  font-weight: 500;
+  font-size: 14px;
+  gap: 12px;
+  min-height: 48px;
+}
+
+.modern-nav-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(255,193,7,0.05) 0%, 
+    rgba(98,123,178,0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.modern-nav-item:hover::before {
+  opacity: 1;
+}
+
+.modern-nav-item i:first-child {
+  color: var(--nexlogix-primary);
+  font-size: 16px;
+  min-width: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.modern-nav-item span {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Dropdown Arrow */
+.dropdown-arrow {
+  color: var(--nexlogix-muted);
+  font-size: 12px;
+  transition: transform 0.3s ease, color 0.3s ease;
+  margin-left: auto;
+}
+
+.dropdown-arrow.rotated {
+  transform: rotate(90deg);
+  color: var(--nexlogix-brand);
+}
+
+/* Navigation Glow Effect */
+.nav-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(255,193,7,0.1) 0%, 
+    rgba(98,123,178,0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 12px;
+}
+
+/* Hover States */
+.modern-nav-item:hover {
+  color: #ffffff;
+  background: rgba(68,91,133,0.3);
+  border-color: rgba(98,123,178,0.4);
+  transform: translateX(4px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+.modern-nav-item:hover .nav-glow {
+  opacity: 1;
+}
+
+.modern-nav-item:hover i:first-child {
+  color: var(--nexlogix-brand);
+  transform: scale(1.1);
+}
+
+/* Active States */
+.modern-nav-item.active {
+  background: linear-gradient(135deg, 
+    rgba(68,91,133,0.6) 0%, 
+    rgba(47,61,92,0.8) 100%);
+  border-color: var(--nexlogix-primary);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 
+    0 0 0 1px rgba(98,123,178,0.3),
+    0 8px 24px rgba(0,0,0,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.modern-nav-item.active i:first-child {
+  color: var(--nexlogix-brand);
+  text-shadow: 0 0 8px rgba(255,193,7,0.3);
+}
+
+.modern-nav-item.active .nav-glow {
+  opacity: 0.8;
+}
+
+/* Home Item Special Styling */
+.home-item {
+  background: linear-gradient(135deg, 
+    rgba(255,193,7,0.1) 0%, 
+    rgba(35,44,66,0.3) 100%);
+  border-color: rgba(255,193,7,0.2);
+}
+
+.home-item i {
+  color: var(--nexlogix-brand) !important;
+}
+
+.home-item.active {
+  background: linear-gradient(135deg, 
+    rgba(255,193,7,0.2) 0%, 
+    rgba(68,91,133,0.6) 100%);
+  border-color: var(--nexlogix-brand);
+  box-shadow: 
+    0 0 0 1px rgba(255,193,7,0.3),
+    0 8px 24px rgba(255,193,7,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+/* Modern Collapse */
+.modern-collapse {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 4px;
+}
+
+.modern-collapse.show {
+  max-height: 400px;
+  opacity: 1;
+}
+
+/* Submenu Container */
+.submenu-container {
+  background: rgba(22,22,37,0.6);
+  border-radius: 8px;
+  padding: 8px;
+  margin-left: 12px;
+  border: 1px solid rgba(58,74,106,0.15);
+  backdrop-filter: blur(5px);
+}
+
+/* Submenu Items */
+.submenu-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  color: var(--nexlogix-muted);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-size: 13px;
+  gap: 10px;
+  margin-bottom: 2px;
+  position: relative;
+}
+
+.submenu-item:last-child {
+  margin-bottom: 0;
+}
+
+.submenu-item i {
+  color: var(--nexlogix-primary);
+  font-size: 14px;
+  min-width: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.submenu-item:hover {
+  color: var(--nexlogix-text);
+  background: rgba(35,44,66,0.5);
+  transform: translateX(6px);
+}
+
+.submenu-item:hover i {
+  color: var(--nexlogix-brand);
+  transform: scale(1.1);
+}
+
+.submenu-item.active {
+  color: #ffffff;
+  background: rgba(68,91,133,0.4);
+  border-left: 3px solid var(--nexlogix-brand);
+  font-weight: 600;
+}
+
+.submenu-item.active i {
+  color: var(--nexlogix-brand);
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .modern-sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .modern-sidebar.show {
+    transform: translateX(0);
+  }
+}
+
+/* Animation Classes */
+.nav-item-enter {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.nav-item-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.3s ease;
+}
+
+/* Focus States for Accessibility - Remove outline */
+.modern-nav-item:focus,
+.modern-nav-item:focus-visible,
+.submenu-item:focus,
+.submenu-item:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove any default focus styles */
+.modern-nav-item:active,
+.modern-nav-item:focus:active,
+.submenu-item:active,
+.submenu-item:focus:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Loading State */
+.sidebar-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.sidebar-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--nexlogix-primary);
+  border-top: 2px solid var(--nexlogix-brand);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Scrollbar Styling */
+.modern-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.modern-sidebar::-webkit-scrollbar-track {
+  background: rgba(22,22,37,0.5);
+}
+
+.modern-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(98,123,178,0.3);
+  border-radius: 2px;
+}
+
+.modern-sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(98,123,178,0.5);
+}

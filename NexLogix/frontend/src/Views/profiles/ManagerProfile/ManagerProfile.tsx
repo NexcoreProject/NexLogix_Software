@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import FooterGeneralManager from "../../componets/Footers/FooterManager";
 import NavbarGeneral from "../../componets/NavBars/NavbarGeneral";
 import './../../Styles/Home/ProfilesGeneralStyle.css';
+import './../../Styles/Sidebar/ModernSidebar.css';
 
 const ManagerProfile = () => {
   const location = useLocation();
@@ -64,91 +65,139 @@ const ManagerProfile = () => {
         <div className="row">
 
           {/* Sidebar: barra lateral de navegación */}
-          <nav id="sidebar" className=" col-lg-2 d-md-block sidebar">
+          <nav id="sidebar" className="col-lg-2 d-md-block modern-sidebar">
             <div className="position-sticky">
-              <ul className="nav flex-column">
+              <div className="nav flex-column modern-nav">
 
                 {/* Opción Inicio */}
-                <li className="nav-item mb-1 mt-3">
-                  <Link className={`btn btn w-100 rounded-3 ${isActive('/manager') ? 'active' : ''}`} to="/manager">
-                    INICIO MANAGER
+                <div className="nav-item-wrapper mb-2">
+                  <Link className={`modern-nav-item home-item ${isActive('/manager') ? 'active' : ''}`} to="/manager">
+                    <i className="bi bi-house-door"></i>
+                    <span>Inicio Manager</span>
+                    <div className="nav-glow"></div>
                   </Link>
-                </li>
+                </div>
 
-                {/* Opción Gestión Áreas con submenú */}
-                <li className="nav-item">
+                {/* Opción Administración con submenú */}
+                <div className="nav-item-wrapper">
                   <Link 
-                    className={getParentLinkClass(['/manager/verAreas', '/manager/Puestos', '/manager/Roles', '/manager/gestionUsuarios'])} 
+                    className={`modern-nav-item dropdown-toggle ${getParentLinkClass(['/manager/verAreas', '/manager/Puestos', '/manager/Roles', '/manager/gestionUsuarios']).includes('active') ? 'active' : ''}`}
                     data-bs-toggle="collapse" 
                     to="#administracion" 
                     role="button" 
                     aria-expanded={activeCollapse === 'administracion' ? "true" : "false"} 
                     aria-controls="administracion"
                   >
-                    Adminstración
+                    <i className="bi bi-gear"></i>
+                    <span>Administración</span>
+                    <i className={`bi bi-chevron-right dropdown-arrow ${activeCollapse === 'administracion' ? 'rotated' : ''}`}></i>
+                    <div className="nav-glow"></div>
                   </Link>
-                  <div className={`collapse ${activeCollapse === 'administracion' ? 'show' : ''}`} id="administracion">
-                    <ul className="nav flex-column">
-                      <Link className={getLinkClass('/manager/verAreas')} to="/manager/verAreas">Areas</Link>
-                      <Link className={getLinkClass('/manager/Puestos')} to="/manager/Puestos">Puestos</Link>
-                      <Link className={getLinkClass('/manager/Roles')} to="/manager/Roles">Roles</Link>
-                      <Link className={getLinkClass('/manager/gestionUsuarios')} to="/manager/gestionUsuarios">Usuarios</Link>
-                    </ul>
+                  <div className={`modern-collapse ${activeCollapse === 'administracion' ? 'show' : ''}`} id="administracion">
+                    <div className="submenu-container">
+                      <Link className={`submenu-item ${getLinkClass('/manager/verAreas').includes('active') ? 'active' : ''}`} to="/manager/verAreas">
+                        <i className="bi bi-diagram-3"></i>
+                        <span>Áreas</span>
+                      </Link>
+                      <Link className={`submenu-item ${getLinkClass('/manager/Puestos').includes('active') ? 'active' : ''}`} to="/manager/Puestos">
+                        <i className="bi bi-briefcase"></i>
+                        <span>Puestos</span>
+                      </Link>
+                      <Link className={`submenu-item ${getLinkClass('/manager/Roles').includes('active') ? 'active' : ''}`} to="/manager/Roles">
+                        <i className="bi bi-person-badge"></i>
+                        <span>Roles</span>
+                      </Link>
+                      <Link className={`submenu-item ${getLinkClass('/manager/gestionUsuarios').includes('active') ? 'active' : ''}`} to="/manager/gestionUsuarios">
+                        <i className="bi bi-people"></i>
+                        <span>Usuarios</span>
+                      </Link>
+                    </div>
                   </div>
-                </li>
+                </div>
 
                 {/* Opción Gestión Auditorías y Reportes con submenú */}
-                <li className="nav-item">
+                <div className="nav-item-wrapper">
                   <Link 
-                    className={getParentLinkClass(['/manager/reportes', '/manager/categoriaReportes', '/manager/auditorias', '/manager/logs'])} 
+                    className={`modern-nav-item dropdown-toggle ${getParentLinkClass(['/manager/reportes', '/manager/categoriaReportes', '/manager/auditorias', '/manager/logs']).includes('active') ? 'active' : ''}`}
                     data-bs-toggle="collapse" 
                     to="#gestionAuditoriasReportes" 
                     role="button" 
                     aria-expanded={activeCollapse === 'gestionAuditoriasReportes' ? "true" : "false"} 
                     aria-controls="gestionAuditoriasReportes"
                   >
-                    Gestión auditorías y reportes
+                    <i className="bi bi-clipboard-data"></i>
+                    <span>Auditorías y Reportes</span>
+                    <i className={`bi bi-chevron-right dropdown-arrow ${activeCollapse === 'gestionAuditoriasReportes' ? 'rotated' : ''}`}></i>
+                    <div className="nav-glow"></div>
                   </Link>
-                  <div className={`collapse ${activeCollapse === 'gestionAuditoriasReportes' ? 'show' : ''}`} id="gestionAuditoriasReportes">
-                    <ul className="nav flex-column">
-                      <Link className={getLinkClass('/manager/reportes')} to="/manager/reportes">Reportes</Link>
-                      <Link className={getLinkClass('/manager/categoriaReportes')} to="/manager/categoriaReportes">Categoría reportes</Link>
-                      <Link className={getLinkClass('/manager/auditorias')} to="/manager/auditorias">Auditorías</Link>
-                      <Link className={getLinkClass('/manager/logs')} to="/manager/logs">Logs</Link>
-                    </ul>
+                  <div className={`modern-collapse ${activeCollapse === 'gestionAuditoriasReportes' ? 'show' : ''}`} id="gestionAuditoriasReportes">
+                    <div className="submenu-container">
+                      <Link className={`submenu-item ${getLinkClass('/manager/reportes').includes('active') ? 'active' : ''}`} to="/manager/reportes">
+                        <i className="bi bi-bar-chart"></i>
+                        <span>Reportes</span>
+                      </Link>
+                      <Link className={`submenu-item ${getLinkClass('/manager/categoriaReportes').includes('active') ? 'active' : ''}`} to="/manager/categoriaReportes">
+                        <i className="bi bi-tags"></i>
+                        <span>Categoría Reportes</span>
+                      </Link>
+                      <Link className={`submenu-item ${getLinkClass('/manager/auditorias').includes('active') ? 'active' : ''}`} to="/manager/auditorias">
+                        <i className="bi bi-shield-check"></i>
+                        <span>Auditorías</span>
+                      </Link>
+                      <Link className={`submenu-item ${getLinkClass('/manager/logs').includes('active') ? 'active' : ''}`} to="/manager/logs">
+                        <i className="bi bi-file-text"></i>
+                        <span>Logs</span>
+                      </Link>
+                    </div>
                   </div>
-                </li>
-                {/* Opción Gestion Logistica con submenú */}
-                <li className="nav-item">
+                </div>
+
+                {/* Opción Gestión Logística con submenú */}
+                <div className="nav-item-wrapper">
                   <Link 
-                    className={getParentLinkClass(['/manager/vehiculos', '/manager/conductores', '/manager/rutas', '/manager/ciudades'])} 
+                    className={`modern-nav-item dropdown-toggle ${getParentLinkClass(['/manager/vehiculos', '/manager/conductores', '/manager/rutas', '/manager/ciudades']).includes('active') ? 'active' : ''}`}
                     data-bs-toggle="collapse" 
                     to="#VehiculosSubmenu" 
                     role="button" 
                     aria-expanded={activeCollapse === 'VehiculosSubmenu' ? "true" : "false"} 
                     aria-controls="VehiculosSubmenu"
                   >
-                    Gestión Logística
+                    <i className="bi bi-truck"></i>
+                    <span>Gestión Logística</span>
+                    <i className={`bi bi-chevron-right dropdown-arrow ${activeCollapse === 'VehiculosSubmenu' ? 'rotated' : ''}`}></i>
+                    <div className="nav-glow"></div>
                   </Link>
-                  <div className={`collapse ${activeCollapse === 'VehiculosSubmenu' ? 'show' : ''}`} id="VehiculosSubmenu">
-                    <ul className="nav flex-column">
-                      <Link className={getLinkClass('/manager/vehiculos')} to="/manager/vehiculos">Lista de vehículos</Link>
-                      <Link className={getLinkClass('/manager/conductores')} to="/manager/conductores">Conductores</Link>
-                      <Link className={getLinkClass('/manager/rutas')} to="/manager/rutas">Rutas</Link>
-                      {/*<Link className="nav-link" to="/manager/envios">Gestion Envíos</Link>*/}
-                      <Link className={getLinkClass('/manager/ciudades')} to="/manager/ciudades">Lista de ciudades</Link>
-
-                    </ul>
+                  <div className={`modern-collapse ${activeCollapse === 'VehiculosSubmenu' ? 'show' : ''}`} id="VehiculosSubmenu">
+                    <div className="submenu-container">
+                      <Link className={`submenu-item ${getLinkClass('/manager/vehiculos').includes('active') ? 'active' : ''}`} to="/manager/vehiculos">
+                        <i className="bi bi-car-front"></i>
+                        <span>Lista de Vehículos</span>
+                      </Link>
+                      <Link className={`submenu-item ${getLinkClass('/manager/conductores').includes('active') ? 'active' : ''}`} to="/manager/conductores">
+                        <i className="bi bi-person-check"></i>
+                        <span>Conductores</span>
+                      </Link>
+                      <Link className={`submenu-item ${getLinkClass('/manager/rutas').includes('active') ? 'active' : ''}`} to="/manager/rutas">
+                        <i className="bi bi-map"></i>
+                        <span>Rutas</span>
+                      </Link>
+                      <Link className={`submenu-item ${getLinkClass('/manager/ciudades').includes('active') ? 'active' : ''}`} to="/manager/ciudades">
+                        <i className="bi bi-building"></i>
+                        <span>Lista de Ciudades</span>
+                      </Link>
+                    </div>
                   </div>
-                </li>
+                </div>
 
-              </ul>
+              </div>
             </div>
           </nav>
 
           {/* Área principal (Main) */}
-          <main>
-            <Outlet />  {/* Aquí se renderiza el contenido según la ruta */}
+          <main className="col-lg-10 modern-main-content">
+            <div className="main-content-wrapper">
+              <Outlet />  {/* Aquí se renderiza el contenido según la ruta */}
+            </div>
           </main>
         </div>
       </div>
