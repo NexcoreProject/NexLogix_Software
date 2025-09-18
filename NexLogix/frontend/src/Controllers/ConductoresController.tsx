@@ -1,49 +1,51 @@
 import { axiosInstance } from '../services/axiosConfig';
-import { IConductor, IConductorCreate, IConductorApiResponse, IUsuarioCreate, IConductorRaw } from '../models/Interfaces/IConductor';
+import {
+    IConductor,
+    IConductorApiResponse,
+    IConductorRaw,
+    ConductorCreateDTO,
+    ConductorUpdateDTO
+} from '../models/Interfaces/IConductor';
+import { EstadoConductorDTO, EstadoControlIdentidadesDTO } from '../models/Interfaces/IConductor';
 
-interface IUserResponse {
-    success: boolean;
-    data: {
-        idusuarios: number;
-        documentoIdentidad: string;
-        nombreCompleto: string;
-        email: string;
-        numContacto: string;
-        direccionResidencia: string;
-        fechaCreacion: string;
-        idRole: number;
-        idestado: number;
-        idPuestos: number;
-    };
-    message?: string;
-    status: number;
-}
 
 // Use IConductorRaw defined in models for the backend raw shape
 
 const BASE_URL = 'http://127.0.0.1:8000/api';
 const CONDUCTORES_URL = `${BASE_URL}/gestion_conductores`;
-const USUARIOS_URL = `${BASE_URL}/gestion_usuarios`;
 
 export class ConductoresController {
     // Raw shape returned by backend (examples provided by backend)
     private static mapApiToIConductor(raw: IConductorRaw): IConductor {
         // safe extraction with runtime checks
-        const usuarioId = typeof raw['idusuarios'] === 'number'
-            ? (raw['idusuarios'] as number)
-            : (typeof raw['idUsuario'] === 'number' ? (raw['idUsuario'] as number) : 0);
-
         const documento = typeof raw['c_documentoIdentidad'] === 'string'
             ? (raw['c_documentoIdentidad'] as string)
             : (typeof raw['documentoIdentidad'] === 'string' ? (raw['documentoIdentidad'] as string) : '');
 
-        const nombre = typeof raw['c_nombreCompleto'] === 'string'
-            ? (raw['c_nombreCompleto'] as string)
-            : (typeof raw['nombreCompleto'] === 'string' ? (raw['nombreCompleto'] as string) : '');
+        // Defensive name extraction: try several possible keys the backend might use
+        const possibleNameKeys = [
+            'c_nombreCompleto', 'c_nombre', 'c_nombres', 'c_fullname',
+            'nombreCompleto', 'nombre', 'nombres', 'fullName'
+        ];
+
+        let nombre = '';
+        for (const k of possibleNameKeys) {
+            const v = raw[k as keyof IConductorRaw];
+            if (typeof v === 'string' && v.trim() !== '') {
+                nombre = v.trim();
+                break;
+            }
+        }
 
         const email = typeof raw['c_email'] === 'string'
             ? (raw['c_email'] as string)
             : (typeof raw['email'] === 'string' ? (raw['email'] as string) : '');
+
+        // If no name found, use the email local-part as fallback (user-friendly)
+        if (!nombre && email) {
+            const local = email.split('@')[0] || '';
+            nombre = local.replace(/[._-]/g, ' ');
+        }
 
         const numContacto = typeof raw['c_numContacto'] === 'string'
             ? (raw['c_numContacto'] as string)
@@ -54,40 +56,39 @@ export class ConductoresController {
             : (typeof raw['direccionResidencia'] === 'string' ? (raw['direccionResidencia'] as string) : '');
 
         let estadoConductor = '';
+        let estadoConductorRaw: EstadoConductorDTO | string | undefined = undefined;
         if (raw.estado_conductor && typeof raw.estado_conductor === 'object' && 'c_estado' in raw.estado_conductor) {
-            estadoConductor = String(raw.estado_conductor.c_estado ?? '');
+            const e = raw.estado_conductor as unknown as EstadoConductorDTO;
+            estadoConductor = String(e.c_estado ?? '');
+            estadoConductorRaw = e;
         } else if (typeof raw.estado_conductor === 'string') {
             estadoConductor = raw.estado_conductor;
+            estadoConductorRaw = raw.estado_conductor;
         }
 
         const estadoUsuario = raw.estado_conductor__control__indentidades && typeof raw.estado_conductor__control__indentidades === 'object'
-            ? String(raw.estado_conductor__control__indentidades.estado ?? '')
+            ? String((raw.estado_conductor__control__indentidades as unknown as EstadoControlIdentidadesDTO).estado ?? '')
             : (typeof raw['estado'] === 'string' ? (raw['estado'] as string) : '');
+        const estadoControlRaw: EstadoControlIdentidadesDTO | string | undefined = raw.estado_conductor__control__indentidades ?? undefined;
 
-        const idRole = typeof raw['idRole'] === 'number' ? (raw['idRole'] as number) : 0;
-        const idestadoUser = typeof raw['idestado_Usuario_control_indentidades'] === 'number'
-            ? (raw['idestado_Usuario_control_indentidades'] as number)
-            : (typeof raw['idestado'] === 'number' ? (raw['idestado'] as number) : 0);
-        const idPuestos = typeof raw['idPuestos'] === 'number' ? (raw['idPuestos'] as number) : 0;
+        // no longer extracting usuario-specific ids; conductor is flat
 
         return {
             idConductor: raw.idConductor,
+            documentoIdentidad: documento,
+            nombreCompleto: nombre,
+            email: email,
+            numContacto: numContacto,
+            direccionResidencia: direccion,
             licencia: raw.licencia,
             tipoLicencia: raw.tipoLicencia,
             vigenciaLicencia: raw.vigenciaLicencia,
+            idEstadoConductor: raw.idEstadoConductor ?? undefined,
+            idestado_Usuario_control_indentidades: raw.idestado_Usuario_control_indentidades ?? undefined,
             estado: String(estadoConductor || estadoUsuario || '').toLowerCase(),
-            usuario: {
-                idusuarios: usuarioId,
-                documentoIdentidad: documento,
-                nombreCompleto: nombre,
-                email: email,
-                numContacto: numContacto,
-                direccionResidencia: direccion,
-                fechaCreacion: raw.fechaCreacion ?? '',
-                idRole: idRole,
-                idestado: idestadoUser,
-                idPuestos: idPuestos,
-            }
+            estado_conductor_raw: estadoConductorRaw,
+            estado_conductor_control_raw: estadoControlRaw,
+            Role: raw.Role ?? undefined
         } as IConductor;
     }
 
@@ -122,61 +123,26 @@ export class ConductoresController {
         }
     }
 
-    static async createConductorWithUser(userData: IUsuarioCreate & Partial<IConductorCreate>): Promise<IConductor> {
+    static async createConductor(conductor: ConductorCreateDTO): Promise<IConductor> {
         try {
-            // 1. Crear usuario primero con los datos predefinidos
-            // Build API payload using backend field names (c_*), backend expects these keys
-            const apiUserPayload = {
-                c_documentoIdentidad: userData.documentoIdentidad,
-                c_nombreCompleto: userData.nombreCompleto,
-                c_email: userData.email,
-                c_numContacto: userData.numContacto,
-                c_direccionResidencia: userData.direccionResidencia,
-                contrasena: userData.contrasena,
-                idRole: 13, // Role ID para conductores
-                idestado: 1, // Estado activo
-                idPuestos: 2 // Puesto predefinido para conductores
-            };
-
-            const userResponse = await axiosInstance.post<IUserResponse>(USUARIOS_URL, apiUserPayload);
-            
-            if (!userResponse.data.success) {
-                throw new Error(userResponse.data.message || 'Error al crear usuario');
+            // Direct POST to gestion_conductores with backend DTO
+            const response = await axiosInstance.post<IConductorApiResponse>(CONDUCTORES_URL, conductor);
+            if (response.data.success) {
+                const raw = response.data.data as unknown as IConductorRaw | IConductorRaw[];
+                const rc = Array.isArray(raw) ? raw[0] : raw;
+                return this.mapApiToIConductor(rc);
             }
-
-            // 2. Crear conductor con el ID de usuario obtenido
-            const conductorData: IConductorCreate = {
-                licencia: userData.licencia!,
-                tipoLicencia: userData.tipoLicencia!,
-                vigenciaLicencia: userData.vigenciaLicencia!,
-                estado: 'disponible',
-                idUsuario: userResponse.data.data.idusuarios
-            };
-
-            const conductorResponse = await axiosInstance.post<IConductorApiResponse>(CONDUCTORES_URL, conductorData);
-
-            if (!conductorResponse.data.success) {
-                // Si falla la creación del conductor, intentar eliminar el usuario creado
-                await axiosInstance.delete(`${USUARIOS_URL}/${userResponse.data.data.idusuarios}`);
-                throw new Error(conductorResponse.data.message || 'Error al crear conductor');
-            }
-
-            // Map backend raw response to IConductor
-            const raw = conductorResponse.data.data as unknown as IConductorRaw | IConductorRaw[];
-            const rc = Array.isArray(raw) ? raw[0] : raw;
-            return this.mapApiToIConductor(rc);
-
+            throw new Error(response.data.message || 'Error al crear conductor');
         } catch (error) {
-            console.error('Error en el proceso de creación:', error);
+            console.error('Error en createConductor:', error);
             throw error;
         }
     }
 
-    static async updateConductor(id: number, data: Partial<IConductorCreate>): Promise<IConductor> {
+    static async updateConductor(id: number, data: ConductorUpdateDTO): Promise<IConductor> {
         try {
             const response = await axiosInstance.patch<IConductorApiResponse>(`${CONDUCTORES_URL}/${id}`, data);
             if (response.data.success) {
-                // backend returns a raw flattened conductor; map it to IConductor
                 const raw = response.data.data as unknown as IConductorRaw | IConductorRaw[];
                 const rc = Array.isArray(raw) ? raw[0] : raw;
                 return this.mapApiToIConductor(rc);
@@ -198,13 +164,5 @@ export class ConductoresController {
         }
     }
 
-    static async getAllUsuarios() {
-        try {
-            const response = await axiosInstance.get<IUserResponse>(USUARIOS_URL);
-            return response.data;
-        } catch (error) {
-            console.error('Error al obtener usuarios:', error);
-            throw error;
-        }
-    }
+   
 }

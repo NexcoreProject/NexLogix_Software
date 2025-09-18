@@ -4,19 +4,20 @@ import { toast } from 'react-toastify';
 import { ConductoresController } from '../../../Controllers/ConductoresController';
 import {
   IConductor,
-  IUsuarioCreate,
-  TipoLicencia
+  TipoLicencia,
+  ConductorCreateDTO
 } from '../../../models/Interfaces/IConductor';
 
 // Tipos de licencia válidos
 const tiposLicencia = ["A1", "A2", "B1", "B2", "B3", "C1", "C2", "C3"] as const;
 
-interface INewConductor extends Omit<IUsuarioCreate, 'idRole' | 'idestado' | 'idPuestos'> {
-  // Campos adicionales para conductor
-  licencia: string;
-  tipoLicencia: TipoLicencia | "";
-  vigenciaLicencia: string;
-}
+// Form-specific type: allow the create DTO fields plus helper fields for nested estado input
+type INewConductor = Partial<ConductorCreateDTO> & {
+  idEstadoConductor?: number | string;
+  idestado_Usuario_control_indentidades?: number | string;
+  estado_conductor_c_estado?: string;
+  estado_control_estado?: string;
+};
 
 const Conductores = () => {
   const [conductores, setConductores] = useState<IConductor[]>([]);
@@ -29,17 +30,23 @@ const Conductores = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize new driver state with proper nested structure
+  // Initialize new driver state with proper flat structure matching backend DTO
   const emptyDriver: INewConductor = {
-    documentoIdentidad: "",
-    nombreCompleto: "",
-    email: "",
-    numContacto: "",
-    direccionResidencia: "",
+    c_documentoIdentidad: "",
+    c_nombreCompleto: "",
+    c_email: "",
+    c_numContacto: "",
+    c_direccionResidencia: "",
     contrasena: "",
     licencia: "",
-    tipoLicencia: "",
-    vigenciaLicencia: ""
+    tipoLicencia: undefined,
+    vigenciaLicencia: "",
+    // possible estado fields to send to backend
+    idEstadoConductor: undefined,
+    idestado_Usuario_control_indentidades: undefined,
+    // helpers for form binding (mapped to nested objects on submit)
+    estado_conductor_c_estado: '',
+    estado_control_estado: ''
   };
 
   const [newDriver, setNewDriver] = useState<INewConductor>(emptyDriver);
@@ -55,24 +62,11 @@ const Conductores = () => {
       const conductoresData = await ConductoresController.getAllConductores();
       console.log('Conductores recibidos:', conductoresData);
       
-      if (Array.isArray(conductoresData) && conductoresData.length > 0) {
-        // Verificar que cada conductor tiene la estructura correcta
-        const validData = conductoresData.filter(conductor => 
-          conductor && 
-          conductor.usuario &&
-          typeof conductor.usuario === 'object'
-        );
-        
-        console.log('Conductores válidos:', validData);
-        
-        if (validData.length === 0) {
-          setError('No se encontraron conductores con datos válidos');
-        } else {
-          setConductores(validData);
-        }
-      } else {
-        setError('No hay conductores para mostrar');
-      }
+          if (Array.isArray(conductoresData) && conductoresData.length > 0) {
+            setConductores(conductoresData);
+          } else {
+            setError('No hay conductores para mostrar');
+          }
     } catch (err) {
       console.error('Error al cargar conductores:', err);
       setError(err instanceof Error ? err.message : 'Error al cargar conductores');
@@ -85,16 +79,16 @@ const Conductores = () => {
 
   // Función de filtrado
   const filteredConductores = conductores.filter(conductor => {
-    if (!conductor || !conductor.usuario) return false;
-    
+    if (!conductor) return false;
+
     const searchLower = searchTerm.toLowerCase();
     return (
-      conductor.usuario.documentoIdentidad?.toLowerCase().includes(searchLower) ||
-      conductor.usuario.nombreCompleto?.toLowerCase().includes(searchLower) ||
-      conductor.usuario.email?.toLowerCase().includes(searchLower) ||
-      conductor.usuario.numContacto?.toLowerCase().includes(searchLower) ||
+      conductor.documentoIdentidad?.toLowerCase().includes(searchLower) ||
+      conductor.nombreCompleto?.toLowerCase().includes(searchLower) ||
+      conductor.email?.toLowerCase().includes(searchLower) ||
+      conductor.numContacto?.toLowerCase().includes(searchLower) ||
       conductor.licencia?.toLowerCase().includes(searchLower) ||
-      conductor.estado?.toLowerCase().includes(searchLower)
+      (conductor.estado ?? '').toLowerCase().includes(searchLower)
     );
   });
 
@@ -109,20 +103,30 @@ const Conductores = () => {
         throw new Error('Tipo de licencia inválido');
       }
 
-      // Primero crear el usuario con los campos requeridos
-      const userPayload = {
-        ...newDriver,
-        idRole: 13, // Role conductor
-        idestado: 1, // Estado activo
-        idPuestos: 2 // Puesto conductor
+      // Construir DTO según el backend (c_* fields)
+      const dto: ConductorCreateDTO = {
+        c_documentoIdentidad: String(newDriver.c_documentoIdentidad || ''),
+        c_nombreCompleto: String(newDriver.c_nombreCompleto || ''),
+        c_email: String(newDriver.c_email || ''),
+        c_numContacto: String(newDriver.c_numContacto || ''),
+        c_direccionResidencia: String(newDriver.c_direccionResidencia || ''),
+        contrasena: String(newDriver.contrasena || ''),
+        licencia: String(newDriver.licencia || ''),
+        tipoLicencia: String(newDriver.tipoLicencia) as TipoLicencia,
+        vigenciaLicencia: String(newDriver.vigenciaLicencia || '')
       };
 
-      await ConductoresController.createConductorWithUser({
-        ...userPayload,
-        licencia: newDriver.licencia,
-        tipoLicencia: newDriver.tipoLicencia as TipoLicencia,
-        vigenciaLicencia: newDriver.vigenciaLicencia
-      });
+      // attach optional estado-related fields if provided in the form
+      if (newDriver.idEstadoConductor) dto.idEstadoConductor = Number(newDriver.idEstadoConductor);
+      if (newDriver.idestado_Usuario_control_indentidades) dto.idestado_Usuario_control_indentidades = Number(newDriver.idestado_Usuario_control_indentidades);
+      if (newDriver.estado_conductor_c_estado && newDriver.estado_conductor_c_estado.trim() !== '') {
+        dto.estado_conductor = { c_estado: String(newDriver.estado_conductor_c_estado) };
+      }
+      if (newDriver.estado_control_estado && newDriver.estado_control_estado.trim() !== '') {
+        dto.estado_conductor__control__indentidades = { estado: String(newDriver.estado_control_estado) };
+      }
+
+      await ConductoresController.createConductor(dto);
 
       setShowCreateModal(false);
       setNewDriver(emptyDriver);
@@ -155,18 +159,11 @@ const Conductores = () => {
       }
 
       // Preparar datos para actualizar
-      const conductorData: Partial<{
-        licencia: string;
-        tipoLicencia: TipoLicencia;
-        vigenciaLicencia: string;
-        estado: string;
-        idUsuario: number;
-      }> = {
+      const conductorData = {
         licencia: editDriver.licencia.trim(),
         tipoLicencia: editDriver.tipoLicencia as TipoLicencia,
         vigenciaLicencia: editDriver.vigenciaLicencia,
-        estado: editDriver.estado || 'disponible',
-        idUsuario: editDriver.usuario.idusuarios
+        estado: editDriver.estado || 'disponible'
       };
 
       // Log para debug
@@ -239,24 +236,27 @@ const Conductores = () => {
   };
 
   // Handler para el modal de edición
-  const handleEditDriverChange = (field: string, value: string, isUserField: boolean = false) => {
+  const handleEditDriverChange = (field: string, value: string | number | undefined) => {
     if (!editDriver) return;
-    
     setEditDriver(prev => {
       if (!prev) return prev;
-      if (isUserField) {
-        return {
-          ...prev,
-          usuario: {
-            ...prev.usuario,
-            [field]: value
-          }
-        };
-      }
       return {
         ...prev,
         [field]: value
-      };
+      } as IConductor;
+    });
+  };
+
+  // Handler para cambios en campos anidados (estado_conductor, estado_control)
+  const handleEditNestedChange = (parentKey: 'estado_conductor_raw' | 'estado_conductor_control_raw', subKey: string, value: string | number | undefined) => {
+    if (!editDriver) return;
+    setEditDriver(prev => {
+      if (!prev) return prev;
+  const prevRec = prev as unknown as Record<string, unknown>;
+  const existing = (prevRec[parentKey] as Record<string, unknown> | undefined) ?? {};
+  const next = { ...prevRec } as Record<string, unknown>;
+  next[parentKey] = { ...existing, [subKey]: value } as unknown;
+      return next as unknown as IConductor;
     });
   };
 
@@ -284,19 +284,19 @@ const Conductores = () => {
   type DriverStatus = 'disponible' | 'en_ruta' | 'no_disponible';
   
   // Helper to get badge color for driver status
-  const getStatusBadge = (estado: string) => {
+  const getStatusBadge = (estado?: string) => {
     const statusClasses: Record<DriverStatus | 'default', string> = {
       'disponible': 'bg-success',
       'en_ruta': 'bg-primary',
       'no_disponible': 'bg-secondary',
       'default': 'bg-warning'
     };
-    
-    const normalizedStatus = estado.toLowerCase() as DriverStatus;
+
+    const normalizedStatus = (estado || '').toLowerCase() as DriverStatus;
     const statusClass = Object.keys(statusClasses).includes(normalizedStatus)
       ? statusClasses[normalizedStatus]
       : statusClasses.default;
-    
+
     return (
       <span className={`badge ${statusClass}`}>
         {estado || 'Sin estado'}
@@ -324,10 +324,10 @@ const Conductores = () => {
         <tbody>
           {filteredConductores.map((conductor) => (
             <tr key={conductor.idConductor}>
-              <td>{conductor.usuario.documentoIdentidad}</td>
-              <td>{conductor.usuario.nombreCompleto}</td>
-              <td>{conductor.usuario.email}</td>
-              <td>{conductor.usuario.numContacto}</td>
+              <td>{conductor.documentoIdentidad}</td>
+              <td>{conductor.nombreCompleto}</td>
+              <td>{conductor.email}</td>
+              <td>{conductor.numContacto}</td>
               <td>{conductor.licencia}</td>
               <td>{conductor.tipoLicencia}</td>
               <td>{getLicenseBadge(conductor.vigenciaLicencia)}</td>
@@ -396,9 +396,9 @@ const Conductores = () => {
                       const filtered = conductores.filter(conductor => {
                         const searchLower = searchTerm.toLowerCase();
                         return (
-                          conductor.usuario.documentoIdentidad?.toLowerCase().includes(searchLower) ||
-                          conductor.usuario.nombreCompleto?.toLowerCase().includes(searchLower) ||
-                          conductor.usuario.email?.toLowerCase().includes(searchLower)
+                          conductor.documentoIdentidad?.toLowerCase().includes(searchLower) ||
+                          conductor.nombreCompleto?.toLowerCase().includes(searchLower) ||
+                          conductor.email?.toLowerCase().includes(searchLower)
                         );
                       });
                       setConductores(filtered);
@@ -471,8 +471,8 @@ const Conductores = () => {
               <Form.Label>Documento de Identidad</Form.Label>
               <Form.Control
                 type="text"
-                name="documentoIdentidad"
-                value={newDriver.documentoIdentidad}
+                name="c_documentoIdentidad"
+                value={newDriver.c_documentoIdentidad}
                 onChange={handleDriverChange}
                 required
               />
@@ -481,8 +481,8 @@ const Conductores = () => {
               <Form.Label>Nombre Completo</Form.Label>
               <Form.Control
                 type="text"
-                name="nombreCompleto"
-                value={newDriver.nombreCompleto}
+                name="c_nombreCompleto"
+                value={newDriver.c_nombreCompleto}
                 onChange={handleDriverChange}
                 required
               />
@@ -491,8 +491,8 @@ const Conductores = () => {
               <Form.Label>Email</Form.Label>
               <Form.Control
                 type="email"
-                name="email"
-                value={newDriver.email}
+                name="c_email"
+                value={newDriver.c_email}
                 onChange={handleDriverChange}
                 required
               />
@@ -501,8 +501,8 @@ const Conductores = () => {
               <Form.Label>Teléfono</Form.Label>
               <Form.Control
                 type="tel"
-                name="numContacto"
-                value={newDriver.numContacto}
+                name="c_numContacto"
+                value={newDriver.c_numContacto}
                 onChange={handleDriverChange}
                 required
               />
@@ -511,8 +511,8 @@ const Conductores = () => {
               <Form.Label>Dirección</Form.Label>
               <Form.Control
                 type="text"
-                name="direccionResidencia"
-                value={newDriver.direccionResidencia}
+                name="c_direccionResidencia"
+                value={newDriver.c_direccionResidencia}
                 onChange={handleDriverChange}
                 required
               />
@@ -541,7 +541,7 @@ const Conductores = () => {
               <Form.Label>Tipo de Licencia</Form.Label>
               <Form.Select
                 name="tipoLicencia"
-                value={newDriver.tipoLicencia}
+                value={String(newDriver.tipoLicencia || '')}
                 onChange={handleDriverChange}
                 required
               >
@@ -561,6 +561,46 @@ const Conductores = () => {
                 value={newDriver.vigenciaLicencia}
                 onChange={handleDriverChange}
                 required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>ID Estado Conductor</Form.Label>
+              <Form.Control
+                type="number"
+                name="idEstadoConductor"
+                value={newDriver.idEstadoConductor !== undefined && newDriver.idEstadoConductor !== null ? String(newDriver.idEstadoConductor) : ''}
+                onChange={handleDriverChange}
+                placeholder="(opcional) Ej: 4"
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Estado Conductor (c_estado)</Form.Label>
+              <Form.Control
+                type="text"
+                name="estado_conductor_c_estado"
+                value={newDriver.estado_conductor_c_estado || ''}
+                onChange={handleDriverChange}
+                placeholder="(opcional) Ej: en_bodega"
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>ID Estado Control Identidades</Form.Label>
+              <Form.Control
+                type="number"
+                name="idestado_Usuario_control_indentidades"
+                value={newDriver.idestado_Usuario_control_indentidades !== undefined && newDriver.idestado_Usuario_control_indentidades !== null ? String(newDriver.idestado_Usuario_control_indentidades) : ''}
+                onChange={handleDriverChange}
+                placeholder="(opcional) Ej: 1"
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Estado Control Identidades (estado)</Form.Label>
+              <Form.Control
+                type="text"
+                name="estado_control_estado"
+                value={newDriver.estado_control_estado || ''}
+                onChange={handleDriverChange}
+                placeholder="(opcional) Ej: ACTIVO"
               />
             </Form.Group>
           </Modal.Body>
@@ -633,6 +673,43 @@ const Conductores = () => {
                   <option value="no_disponible">No Disponible</option>
                 </Form.Select>
               </Form.Group>
+
+              {/* Nested estado fields editing */}
+              <Form.Group className="mb-3">
+                <Form.Label>ID Estado Conductor</Form.Label>
+                <Form.Control
+                  type="number"
+                  value={editDriver.idEstadoConductor ?? ''}
+                  onChange={(e) => handleEditDriverChange('idEstadoConductor', e.target.value ? Number(e.target.value) : undefined)}
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Estado Conductor (c_estado)</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={typeof editDriver.estado_conductor_raw === 'string' ? editDriver.estado_conductor_raw : (editDriver.estado_conductor_raw?.c_estado ?? '')}
+                  onChange={(e) => handleEditNestedChange('estado_conductor_raw', 'c_estado', e.target.value)}
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>ID Estado Control Identidades</Form.Label>
+                <Form.Control
+                  type="number"
+                  value={editDriver.idestado_Usuario_control_indentidades ?? ''}
+                  onChange={(e) => handleEditDriverChange('idestado_Usuario_control_indentidades', e.target.value ? Number(e.target.value) : undefined)}
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Estado Control Identidades (estado)</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={typeof editDriver.estado_conductor_control_raw === 'string' ? editDriver.estado_conductor_control_raw : (editDriver.estado_conductor_control_raw?.estado ?? '')}
+                  onChange={(e) => handleEditNestedChange('estado_conductor_control_raw', 'estado', e.target.value)}
+                />
+              </Form.Group>
             </Form>
           )}
         </Modal.Body>
@@ -666,7 +743,7 @@ const Conductores = () => {
           {selectedDriver && (
             <p>
               ¿Está seguro que desea eliminar al conductor{' '}
-              <strong>{selectedDriver.usuario.nombreCompleto}</strong>?
+              <strong>{selectedDriver.nombreCompleto}</strong>?
               Esta acción no se puede deshacer.
             </p>
           )}
