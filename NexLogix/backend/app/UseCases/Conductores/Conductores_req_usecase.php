@@ -2,13 +2,13 @@
 
     namespace App\UseCases\Conductores;
 
-    use App\Models\Conductores;
     use App\Services\Conductores\Conductores_service;
     use Illuminate\Support\Facades\Validator;
     use Illuminate\Validation\Rule;
 
     class Conductores_req_usecase
     {
+        
     protected Conductores_service $conductoresService;
 
         public function __construct(Conductores_service $conductoresService)
@@ -90,4 +90,4 @@
 
             return $this->conductoresService->updateConductor($id, $validator->validated());
         }
-    }
+}
