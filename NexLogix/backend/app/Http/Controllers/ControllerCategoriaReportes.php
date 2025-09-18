@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CategoriaReportes;
 use App\Services\ServiceCategoriaReporte;
 use App\UseCases\UseCaseCategoriaReportes;
 use Illuminate\Http\Request;

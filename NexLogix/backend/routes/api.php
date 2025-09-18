@@ -237,10 +237,12 @@ Route::group([
 });
 
 //
-/// ESTADO // RUTAS PROTEGIDAS, pero  SIN AUDITORIA, pendiente....
+/// MODULOS ESTADOS
 //
 
+// GESTION ESTADO USUARIOS
 use App\Http\Controllers\Estado\EstadoControllers;
+use App\Http\Controllers\Estado\EstadoConductoresController;
 
 Route::group([
     'middleware' => ['api', 'auth:api'],
@@ -254,6 +256,23 @@ Route::group([
         ->middleware('role:2'); // Solo Manager
     Route::delete('/{id}', [EstadoControllers::class, 'deleteEstado'])
         ->middleware('role:2'); // Solo Manager
+});
+
+// GESTION ESTADO CONDUCTORES
+Route::group([
+    'middleware' => ['api', 'auth:api'],
+    'prefix' => 'gestion_estado_conductores'
+], function() {
+    Route::get('/', [EstadoConductoresController::class, 'getAllEC'])
+        ->middleware('role:2,3');
+    Route::get('/{id}', [EstadoConductoresController::class, 'getECById'])
+        ->middleware('role:2,3');
+    Route::post('/', [EstadoConductoresController::class, 'createEC'])
+        ->middleware('role:2');
+    // Route::patch('/{id}', [EstadoConductoresController::class, 'updateEC'])
+    //     ->middleware('role:2');
+    // Route::delete('/{id}', [EstadoConductoresController::class, 'deleteEC'])
+    //     ->middleware('role:2');
 });
 
 
