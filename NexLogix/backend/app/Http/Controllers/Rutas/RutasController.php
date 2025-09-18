@@ -1,6 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Rutas
+namespace App\Http\Controllers\Rutas;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Interfaces\Rutas\IRutasService;
+use App\Models\Interfaces\Rutas\IRutasUseCase;
 
 class RutasController extends Controller
 {

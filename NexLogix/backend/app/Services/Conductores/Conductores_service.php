@@ -3,7 +3,6 @@
 namespace App\Services\Conductores;
 
 use App\Models\Conductores;
-use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use Exception;
@@ -14,7 +13,8 @@ class Conductores_service
     public function getAll(): array
     {
         try {
-            $conductores = Conductores::with('usuario.roles','usuario.estado')->get();
+            // No eager-load de usuarios: conductores es independiente
+            $conductores = Conductores::with('estadoConductor', 'estadoConductor_Control_Indentidades')->get();
             if ($conductores->isEmpty()) {
                 return [
                     'success' => false,
@@ -42,16 +42,12 @@ class Conductores_service
     public function getConductorById(string $value): array // $value puede ser ID, documento de identidad o email que se recibe de las APIS o de la DB
     {
         try {
-            $conductor_found = Conductores::with('usuario.roles')
-                ->where('idConductor', $value) // Busca por ID del conductor
-                //Si no viene id buscamos por documento de identidad o email del usuario
-                ->orWhereHas('usuario', function ($query) use ($value) {
-                    $query
-                        // Se busca por documento de identidad, email o licencia del conductor
-                        ->where('documentoIdentidad', $value)
-                        ->orWhere('email', $value)
-                        ->orWhere('licencia', $value);
-                })
+            // Buscar en la tabla `conductores` directamente por id, documento, email o licencia
+            $conductor_found = Conductores::where('idConductor', $value)
+                ->orWhere('c_documentoIdentidad', $value)
+                ->orWhere('c_email', $value)
+                ->orWhere('licencia', $value)
+                ->with('estadoConductor', 'estadoConductor_Control_Indentidades')
                 ->firstOrFail();
 
 
@@ -81,19 +77,20 @@ class Conductores_service
     public function getActiveConductores(?string $value = null): array
     {
         try {
-            $query = Conductores::with('usuario.roles')
-                ->whereIn('estado', ['disponible', 'en_ruta']);
+            // Filtrar por el estado textual almacenado en la tabla estado_conductores
+            $query = Conductores::with('estadoConductor')
+                ->whereHas('estadoConductor', function ($q) {
+                    $q->whereIn('c_estado', ['disponible', 'en_ruta']);
+                });
 
             // Solo aplica filtros si viene un valor de búsqueda
             if ($value) {
                 $query->where(function ($query) use ($value) {
                     $query->where('idConductor', $value)
                         ->orWhere('licencia', 'like', "%{$value}%")
-                        ->orWhereHas('usuario', function ($q) use ($value) {
-                            $q->where('documentoIdentidad', 'like', "%{$value}%")
-                                ->orWhere('email', 'like', "%{$value}%")
-                                ->orWhere('nombreCompleto', 'like', "%{$value}%");
-                        });
+                        ->orWhere('c_documentoIdentidad', 'like', "%{$value}%")
+                        ->orWhere('c_email', 'like', "%{$value}%")
+                        ->orWhere('c_numContacto', 'like', "%{$value}%");
                 });
             }
 
@@ -192,14 +189,10 @@ class Conductores_service
     public function updateConductor(string $value, array $data): array
     {
         try {
-            $conductor_found = Conductores::with('usuario.roles')
-                ->where('idConductor', $value)
-                ->orWhereHas('usuario', function ($query) use ($value) {
-                    $query
-                        ->where('documentoIdentidad', $value)
-                        ->orWhere('email', $value)
-                        ->orWhere('licencia', $value);
-                })
+            $conductor_found = Conductores::where('idConductor', $value)
+                ->orWhere('c_documentoIdentidad', $value)
+                ->orWhere('c_email', $value)
+                ->orWhere('licencia', $value)
                 ->firstOrFail();
 
             $conductor_found->update($data);
@@ -235,14 +228,10 @@ class Conductores_service
     public function deleteConductor(string $value): array
     {
         try {
-            $conductor_found = Conductores::with('usuario.roles')
-                ->where('idConductor', $value)
-                ->orWhereHas('usuario', function ($query) use ($value) {
-                    $query
-                        ->where('documentoIdentidad', $value)
-                        ->orWhere('email', $value)
-                        ->orWhere('licencia', $value);
-                })
+            $conductor_found = Conductores::where('idConductor', $value)
+                ->orWhere('c_documentoIdentidad', $value)
+                ->orWhere('c_email', $value)
+                ->orWhere('licencia', $value)
                 ->firstOrFail();
 
             $conductor_found->delete();

@@ -17,7 +17,13 @@ class Estado extends Model
     ];
 
     public function users() {
-        return $this->hasMany( User::class, 'estado_id', 'id');
+        // users.idestado -> estado.idestado
+        return $this->hasMany(User::class, 'idestado', 'idestado');
     }
-    
+
+    public function conductores() {
+        // conductores.idestado_Usuario_control_indentidades -> estado.idestado
+        return $this->hasMany(Conductores::class, 'idestado_Usuario_control_indentidades', 'idestado');
+    }
+
 }
