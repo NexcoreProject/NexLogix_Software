@@ -36,6 +36,25 @@ export interface IConductor {
   usuario: IUsuario;
 }
 
+// Raw API conductor shape (some fields are flattened and prefixed with 'c_' in backend)
+export interface IConductorRaw {
+  idConductor: number;
+  Role?: string;
+  c_documentoIdentidad?: string;
+  c_email?: string;
+  c_numContacto?: string;
+  c_direccionResidencia?: string;
+  licencia: string;
+  tipoLicencia: string;
+  vigenciaLicencia: string;
+  idEstadoConductor?: number;
+  idestado_Usuario_control_indentidades?: number;
+  estado_conductor?: { idEstadoConductor?: number; c_estado?: string } | string;
+  estado_conductor__control__indentidades?: { idestado?: number; estado?: string };
+  fechaCreacion?: string;
+  [key: string]: unknown;
+}
+
 export interface IConductorCreate {
     licencia: string;
     tipoLicencia: TipoLicencia;
