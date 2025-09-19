@@ -7,6 +7,7 @@ import {
   TipoLicencia,
   ConductorCreateDTO
 } from '../../../models/Interfaces/IConductor';
+import { ConductorUpdateDTO, EstadoConductorDTO, EstadoControlIdentidadesDTO } from '../../../models/Interfaces/IConductor';
 
 // Tipos de licencia válidos
 const tiposLicencia = ["A1", "A2", "B1", "B2", "B3", "C1", "C2", "C3"] as const;
@@ -29,6 +30,8 @@ const Conductores = () => {
   const [selectedDriver, setSelectedDriver] = useState<IConductor | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [estadosUsuarios, setEstadosUsuarios] = useState<Array<{ idestado?: number; estado?: string }>>([]);
+  const [estadosConductores, setEstadosConductores] = useState<Array<{ idEstadoConductor?: number; c_estado?: string }>>([]);
 
   // Initialize new driver state with proper flat structure matching backend DTO
   const emptyDriver: INewConductor = {
@@ -53,6 +56,13 @@ const Conductores = () => {
 
   useEffect(() => {
     fetchConductores();
+    // fetch estados for selects
+    (async () => {
+      const eu = await ConductoresController.getEstadosUsuarios();
+      setEstadosUsuarios(eu);
+      const ec = await ConductoresController.getEstadosConductores();
+      setEstadosConductores(ec);
+    })();
   }, []);
 
   const fetchConductores = async () => {
@@ -159,12 +169,28 @@ const Conductores = () => {
       }
 
       // Preparar datos para actualizar
-      const conductorData = {
+      const conductorData: ConductorUpdateDTO = {
         licencia: editDriver.licencia.trim(),
         tipoLicencia: editDriver.tipoLicencia as TipoLicencia,
-        vigenciaLicencia: editDriver.vigenciaLicencia,
-        estado: editDriver.estado || 'disponible'
+        vigenciaLicencia: editDriver.vigenciaLicencia
       };
+
+      // include nested estado fields if present in editDriver
+      if (editDriver.idEstadoConductor) conductorData.idEstadoConductor = Number(editDriver.idEstadoConductor);
+      if (editDriver.idestado_Usuario_control_indentidades) conductorData.idestado_Usuario_control_indentidades = Number(editDriver.idestado_Usuario_control_indentidades);
+      // estado_conductor_raw may be object or string
+      if (editDriver.estado_conductor_raw && typeof editDriver.estado_conductor_raw !== 'string') {
+        const raw = editDriver.estado_conductor_raw as EstadoConductorDTO;
+        if (raw.c_estado) conductorData.estado_conductor = { c_estado: String(raw.c_estado) };
+      } else if (typeof editDriver.estado_conductor_raw === 'string' && editDriver.estado_conductor_raw) {
+        conductorData.estado_conductor = { c_estado: String(editDriver.estado_conductor_raw) };
+      }
+      if (editDriver.estado_conductor_control_raw && typeof editDriver.estado_conductor_control_raw !== 'string') {
+        const raw = editDriver.estado_conductor_control_raw as EstadoControlIdentidadesDTO;
+        if (raw.estado) conductorData.estado_conductor__control__indentidades = { estado: String(raw.estado) };
+      } else if (typeof editDriver.estado_conductor_control_raw === 'string' && editDriver.estado_conductor_control_raw) {
+        conductorData.estado_conductor__control__indentidades = { estado: String(editDriver.estado_conductor_control_raw) };
+      }
 
       // Log para debug
       console.log('Datos a enviar:', conductorData);
@@ -304,6 +330,20 @@ const Conductores = () => {
     );
   };
 
+  // Helper to render control-identities badge (ACTIVO / INACTIVO / etc.)
+  const getControlBadge = (controlEstado?: string) => {
+    const text = controlEstado || 'Sin estado';
+    const lower = (controlEstado || '').toLowerCase();
+    const classMap: Record<string, string> = {
+      'activo': 'bg-success',
+      'inactivo': 'bg-secondary',
+      'bloqueado': 'bg-danger',
+      'suspendido': 'bg-warning'
+    };
+    const cls = classMap[lower] || 'bg-info';
+    return <span className={`badge ${cls}`}>{text}</span>;
+  };
+
   // Renderizado de la tabla
   const renderTable = () => (
     <div className="table-responsive">
@@ -317,7 +357,8 @@ const Conductores = () => {
             <th>Licencia</th>
             <th>Tipo</th>
             <th>Vigencia</th>
-            <th>Estado</th>
+            <th>Estado Conductor</th>
+            <th>Estado Usuario</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -332,6 +373,7 @@ const Conductores = () => {
               <td>{conductor.tipoLicencia}</td>
               <td>{getLicenseBadge(conductor.vigenciaLicencia)}</td>
               <td>{getStatusBadge(conductor.estado)}</td>
+              <td>{getControlBadge(typeof conductor.estado_conductor_control_raw === 'string' ? conductor.estado_conductor_control_raw : (conductor.estado_conductor_control_raw?.estado ?? undefined))}</td>
               <td>
                 <Button
                   variant="primary"
@@ -564,44 +606,23 @@ const Conductores = () => {
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>ID Estado Conductor</Form.Label>
-              <Form.Control
-                type="number"
-                name="idEstadoConductor"
-                value={newDriver.idEstadoConductor !== undefined && newDriver.idEstadoConductor !== null ? String(newDriver.idEstadoConductor) : ''}
-                onChange={handleDriverChange}
-                placeholder="(opcional) Ej: 4"
-              />
+              <Form.Label>Estado Conductor</Form.Label>
+              <Form.Select name="idEstadoConductor" value={String(newDriver.idEstadoConductor ?? '')} onChange={handleDriverChange}>
+                <option value="">(Seleccione)</option>
+                {estadosConductores.map(s => (
+                  <option key={s.idEstadoConductor} value={String(s.idEstadoConductor)}>{s.c_estado}</option>
+                ))}
+              </Form.Select>
             </Form.Group>
+
             <Form.Group className="mb-3">
-              <Form.Label>Estado Conductor (c_estado)</Form.Label>
-              <Form.Control
-                type="text"
-                name="estado_conductor_c_estado"
-                value={newDriver.estado_conductor_c_estado || ''}
-                onChange={handleDriverChange}
-                placeholder="(opcional) Ej: en_bodega"
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>ID Estado Control Identidades</Form.Label>
-              <Form.Control
-                type="number"
-                name="idestado_Usuario_control_indentidades"
-                value={newDriver.idestado_Usuario_control_indentidades !== undefined && newDriver.idestado_Usuario_control_indentidades !== null ? String(newDriver.idestado_Usuario_control_indentidades) : ''}
-                onChange={handleDriverChange}
-                placeholder="(opcional) Ej: 1"
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Estado Control Identidades (estado)</Form.Label>
-              <Form.Control
-                type="text"
-                name="estado_control_estado"
-                value={newDriver.estado_control_estado || ''}
-                onChange={handleDriverChange}
-                placeholder="(opcional) Ej: ACTIVO"
-              />
+              <Form.Label>Estado Control Identidades</Form.Label>
+              <Form.Select name="idestado_Usuario_control_indentidades" value={String(newDriver.idestado_Usuario_control_indentidades ?? '')} onChange={handleDriverChange}>
+                <option value="">(Seleccione)</option>
+                {estadosUsuarios.map(s => (
+                  <option key={s.idestado} value={String(s.idestado)}>{s.estado}</option>
+                ))}
+              </Form.Select>
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
@@ -676,39 +697,39 @@ const Conductores = () => {
 
               {/* Nested estado fields editing */}
               <Form.Group className="mb-3">
-                <Form.Label>ID Estado Conductor</Form.Label>
-                <Form.Control
-                  type="number"
-                  value={editDriver.idEstadoConductor ?? ''}
-                  onChange={(e) => handleEditDriverChange('idEstadoConductor', e.target.value ? Number(e.target.value) : undefined)}
-                />
+                <Form.Label>Estado Conductor</Form.Label>
+                <Form.Select
+                  value={String(editDriver.idEstadoConductor ?? '')}
+                  onChange={(e) => {
+                    const id = e.target.value ? Number(e.target.value) : undefined;
+                    handleEditDriverChange('idEstadoConductor', id);
+                    const selected = estadosConductores.find(s => s.idEstadoConductor === id);
+                    if (selected) handleEditNestedChange('estado_conductor_raw', 'c_estado', selected.c_estado ?? undefined);
+                  }}
+                >
+                  <option value="">(Seleccione)</option>
+                  {estadosConductores.map(s => (
+                    <option key={s.idEstadoConductor} value={String(s.idEstadoConductor)}>{s.c_estado}</option>
+                  ))}
+                </Form.Select>
               </Form.Group>
 
               <Form.Group className="mb-3">
-                <Form.Label>Estado Conductor (c_estado)</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={typeof editDriver.estado_conductor_raw === 'string' ? editDriver.estado_conductor_raw : (editDriver.estado_conductor_raw?.c_estado ?? '')}
-                  onChange={(e) => handleEditNestedChange('estado_conductor_raw', 'c_estado', e.target.value)}
-                />
-              </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>ID Estado Control Identidades</Form.Label>
-                <Form.Control
-                  type="number"
-                  value={editDriver.idestado_Usuario_control_indentidades ?? ''}
-                  onChange={(e) => handleEditDriverChange('idestado_Usuario_control_indentidades', e.target.value ? Number(e.target.value) : undefined)}
-                />
-              </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>Estado Control Identidades (estado)</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={typeof editDriver.estado_conductor_control_raw === 'string' ? editDriver.estado_conductor_control_raw : (editDriver.estado_conductor_control_raw?.estado ?? '')}
-                  onChange={(e) => handleEditNestedChange('estado_conductor_control_raw', 'estado', e.target.value)}
-                />
+                <Form.Label>Estado Control Identidades</Form.Label>
+                <Form.Select
+                  value={String(editDriver.idestado_Usuario_control_indentidades ?? '')}
+                  onChange={(e) => {
+                    const id = e.target.value ? Number(e.target.value) : undefined;
+                    handleEditDriverChange('idestado_Usuario_control_indentidades', id);
+                    const selected = estadosUsuarios.find(s => s.idestado === id);
+                    if (selected) handleEditNestedChange('estado_conductor_control_raw', 'estado', selected.estado ?? undefined);
+                  }}
+                >
+                  <option value="">(Seleccione)</option>
+                  {estadosUsuarios.map(s => (
+                    <option key={s.idestado} value={String(s.idestado)}>{s.estado}</option>
+                  ))}
+                </Form.Select>
               </Form.Group>
             </Form>
           )}

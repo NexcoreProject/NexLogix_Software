@@ -13,6 +13,8 @@ import { EstadoConductorDTO, EstadoControlIdentidadesDTO } from '../models/Inter
 
 const BASE_URL = 'http://127.0.0.1:8000/api';
 const CONDUCTORES_URL = `${BASE_URL}/gestion_conductores`;
+const ESTADOS_USUARIOS_URL = `${BASE_URL}/gestion_estados`;
+const ESTADOS_CONDUCTORES_URL = `${BASE_URL}/gestion_estado_conductores`;
 
 export class ConductoresController {
     // Raw shape returned by backend (examples provided by backend)
@@ -136,6 +138,28 @@ export class ConductoresController {
         } catch (error) {
             console.error('Error en createConductor:', error);
             throw error;
+        }
+    }
+
+    static async getEstadosUsuarios(): Promise<EstadoControlIdentidadesDTO[]> {
+        try {
+            const response = await axiosInstance.get<{ success: boolean; data: EstadoControlIdentidadesDTO[] }>(ESTADOS_USUARIOS_URL);
+            if (response.data && Array.isArray(response.data.data)) return response.data.data;
+            return [];
+        } catch (error) {
+            console.error('Error al obtener estados usuarios:', error);
+            return [];
+        }
+    }
+
+    static async getEstadosConductores(): Promise<EstadoConductorDTO[]> {
+        try {
+            const response = await axiosInstance.get<{ success: boolean; data: EstadoConductorDTO[] }>(ESTADOS_CONDUCTORES_URL);
+            if (response.data && Array.isArray(response.data.data)) return response.data.data;
+            return [];
+        } catch (error) {
+            console.error('Error al obtener estados conductores:', error);
+            return [];
         }
     }
 
