@@ -660,38 +660,41 @@ const GestionVehiculos = () => {
               <label className="form-label">Buscar conductor</label>
               <input
                 className="form-control"
-                placeholder="Buscar por nombre..."
+                placeholder="Buscar por nombre, email o documento..."
                 value={conductorSearch}
                 onChange={e => {
                   setConductorSearch(e.target.value);
                   setSelectedConductor(null);
                 }}
               />
-              <div className="list-group mt-1" style={{ maxHeight: 120, overflowY: "auto" }}>
-                {conductorSearch &&
-                  conductores
-                    .filter(c => {
-                      const nombre = extractConductorNombre(c) ?? '';
-                      const crecord = c as unknown as Record<string, unknown>;
-                      const email = crecord['c_email'] ?? crecord['email'] ?? '';
-                      const doc = crecord['c_documentoIdentidad'] ?? crecord['documentoIdentidad'] ?? '';
-                      const q = conductorSearch.toLowerCase();
-                      return (
-                        String(nombre).toLowerCase().includes(q) ||
-                        String(email).toLowerCase().includes(q) ||
-                        String(doc).toLowerCase().includes(q)
-                      );
-                    })
-                    .map(c => (
-                      <button
-                        type="button"
-                        key={c.idConductor}
-                        className={`list-group-item list-group-item-action${selectedConductor?.idConductor === c.idConductor ? " active" : ""}`}
-                        onClick={() => setSelectedConductor(c)}
-                      >
-                        {extractConductorNombre(c) ?? ''}
-                      </button>
-                    ))}
+              <div className="list-group mt-1" style={{ maxHeight: 180, overflowY: "auto" }}>
+                {conductores
+                  .filter(c => {
+                    // when search is empty return all
+                    if (!conductorSearch || conductorSearch.trim() === '') return true;
+                    const nombre = (extractConductorNombre(c) ?? '').toString();
+                    const crecord = c as unknown as Record<string, unknown>;
+                    const email = String(crecord['c_email'] ?? crecord['email'] ?? '');
+                    const doc = String(crecord['c_documentoIdentidad'] ?? crecord['documentoIdentidad'] ?? '');
+                    const q = conductorSearch.toLowerCase();
+                    return (
+                      nombre.toLowerCase().includes(q) ||
+                      email.toLowerCase().includes(q) ||
+                      doc.toLowerCase().includes(q)
+                    );
+                  })
+                  .map(c => (
+                    <button
+                      type="button"
+                      key={c.idConductor}
+                      className={`list-group-item list-group-item-action${selectedConductor?.idConductor === c.idConductor ? " active" : ""}`}
+                      onClick={() => setSelectedConductor(c)}
+                      title={`${String((c as unknown as Record<string, unknown>)['c_email'] ?? (c as unknown as Record<string, unknown>)['email'] ?? '')}`}
+                    >
+                      <div className="fw-semibold">{extractConductorNombre(c) ?? ('#' + String(c.idConductor))}</div>
+                      <div className="small text-muted">{String((c as unknown as Record<string, unknown>)['c_email'] ?? (c as unknown as Record<string, unknown>)['email'] ?? '')} • {String((c as unknown as Record<string, unknown>)['c_documentoIdentidad'] ?? (c as unknown as Record<string, unknown>)['documentoIdentidad'] ?? '')}</div>
+                    </button>
+                  ))}
               </div>
             </div>
             {selectedConductor && (

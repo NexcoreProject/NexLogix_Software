@@ -145,7 +145,27 @@ export class VehiculosController {
     static async getActiveConductors(): Promise<IConductor[]> {
         try {
             const response = await axiosInstance.get<IConductorApiResponse>('http://127.0.0.1:8000/api/gestion_conductores/filtro_conductores_activos');
-            return Array.isArray(response.data.data) ? response.data.data : [response.data.data];
+            const raw = Array.isArray(response.data.data) ? response.data.data as unknown[] : [response.data.data];
+            // Map raw backend items to IConductor using ConductoresController mapper with safe fallback
+            const mapped: IConductor[] = raw.map(r => {
+                const rec = r as unknown as Record<string, unknown>;
+                try {
+                    return ConductoresController.mapApiToIConductor(rec as IConductorRaw);
+                } catch (err) {
+                    console.warn('Failed to map active conductor, applying fallback:', err);
+                    return {
+                        idConductor: Number(rec['idConductor'] ?? rec['id'] ?? 0),
+                        documentoIdentidad: String(rec['c_documentoIdentidad'] ?? rec['documentoIdentidad'] ?? ''),
+                        nombreCompleto: String(rec['c_nombreCompleto'] ?? rec['nombreCompleto'] ?? rec['email'] ?? ''),
+                        email: String(rec['c_email'] ?? rec['email'] ?? ''),
+                        licencia: String(rec['licencia'] ?? ''),
+                        tipoLicencia: String(rec['tipoLicencia'] ?? ''),
+                        vigenciaLicencia: String(rec['vigenciaLicencia'] ?? ''),
+                        estado: String((rec['estado_conductor'] && (rec['estado_conductor'] as Record<string, unknown>)['c_estado']) ?? rec['estado'] ?? '').toLowerCase()
+                    } as IConductor;
+                }
+            });
+            return mapped;
         } catch (error) {
             console.error('Error al obtener conductores activos:', error);
             throw error;
