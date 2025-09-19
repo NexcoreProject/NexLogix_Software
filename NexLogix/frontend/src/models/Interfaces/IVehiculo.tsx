@@ -14,41 +14,23 @@ export interface IVehiculoApiResponse {
     data: IVehiculo[] | IVehiculo;
     status: number;
 }
+import { IConductor } from './IConductor';
 
-export interface IConductor {
-    idConductor: number;
-    licencia: string;
-    tipoLicencia: string;
-    vigenciaLicencia: string;
-    estado: string;
-    idUsuario: number;
-    usuario: {
-        idusuarios: number;
-        documentoIdentidad: string;
-        nombreCompleto: string;
-        email: string;
-        numContacto: string;
-        direccionResidencia: string;
-        estado: {
-            idestado: number;
-            estado: string;
-        }
-    }
-}
-
+// Assignment may include either a lightweight conductor payload or the full IConductor
 export interface IAsignacionVehiculo {
     idAsignacion: number;
     fecha_asignacion_vehiculo: string;
     fecha_entrega_vehiculo: string | null;
-    conductor: {
+    conductor: IConductor | {
         licencia: string;
         tipoLicencia: string;
         vigenciaLicencia: string;
         estado: string;
-        usuario: {
-            email: string;
-            nombreCompleto: string;
-            documentoIdentidad: string;
+        // older payloads included a nested usuario; keep optional for compatibility
+        usuario?: {
+            email?: string;
+            nombreCompleto?: string;
+            documentoIdentidad?: string;
         }
     };
     vehiculo: {
@@ -59,7 +41,7 @@ export interface IAsignacionVehiculo {
 
 export interface IAsignacionVehiculoApiResponse {
     success: boolean;
-    message: string;
+    message?: string;
     data: IAsignacionVehiculo[];
     status: number;
 }

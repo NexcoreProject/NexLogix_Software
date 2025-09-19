@@ -11,7 +11,12 @@ class ACPV_Service
     public function showAll_ACPV()
     {
         try {
-            $ACPV = asignacion_conductor_por_vehiculos::with('conductor.usuario', 'vehiculo')->get();
+            // eager load conductor's estado relations and vehiculo to avoid N+1 and direct usuario dependency
+            $ACPV = asignacion_conductor_por_vehiculos::with([
+                'conductor.estadoConductor',
+                'conductor.estadoConductor_Control_Indentidades',
+                'vehiculo'
+            ])->get();
             if ($ACPV->isEmpty()) {
                 return [
                     'success' => false,
@@ -19,34 +24,10 @@ class ACPV_Service
                     'status' => 404
                 ];
             }
-
-            $info_ACPV = $ACPV->map(function ($asignacion) {
-                return [
-                    'idAsignacion' => $asignacion->idAsignacion,
-                    'fecha_asignacion_vehiculo' => $asignacion->fecha_asignacion_vehiculo,
-                    'fecha_entrega_vehiculo' => $asignacion->fecha_entrega_vehiculo,
-                    'conductor' => $asignacion->conductor ? [
-                        'licencia' => $asignacion->conductor->licencia,
-                        'tipoLicencia' => $asignacion->conductor->tipoLicencia,
-                        'vigenciaLicencia' => $asignacion->conductor->vigenciaLicencia,
-                        'estado' => $asignacion->conductor->estado,
-                        'usuario' => $asignacion->conductor->usuario ? [
-                            'email' => $asignacion->conductor->usuario->email,
-                            'nombreCompleto' => $asignacion->conductor->usuario->nombreCompleto,
-                            'documentoIdentidad' => $asignacion->conductor->usuario->documentoIdentidad,
-                        ] : null
-                    ] : null,
-                    'vehiculo' => $asignacion->vehiculo ? [
-                        'placa' => $asignacion->vehiculo->placa,
-                        'marca' => $asignacion->vehiculo->marcaVehiculo,
-                    ] : null
-                ];
-            });
-
             return [
                 'success' => true,
                 'message' => 'Lista de vehiculos:',
-                'data' => $info_ACPV,
+                'data' => $ACPV,
                 'status' => 200
             ];
         } catch (Exception $e) {
@@ -61,41 +42,21 @@ class ACPV_Service
 
 public function showBySearching_ACPV(array $data)
 {
-    try {
-        $ACPV = asignacion_conductor_por_vehiculos::with(
-            'conductor.usuario.estado',
-            'vehiculo'
-        )->findOrFail($data);
+        try {
+            // eager load the conductor's estado relations and vehicle
+            $ACPV = asignacion_conductor_por_vehiculos::with([
+                'conductor.estadoConductor',
+                'conductor.estadoConductor_Control_Indentidades',
+                'vehiculo'
+            ])->findOrFail($data);
 
-        $ACPV =  [
-            'idAsignacion' => $ACPV->idAsignacion,
-            'fecha_asignacion_vehiculo' => $ACPV->fecha_asignacion_vehiculo,
-            'fecha_entrega_vehiculo' => $ACPV->fecha_entrega_vehiculo,
-            'conductor' => $ACPV->conductor ? [
-                'licencia' => $ACPV->conductor->licencia,
-                'tipoLicencia' => $ACPV->conductor->tipoLicencia,
-                'vigenciaLicencia' => $ACPV->conductor->vigenciaLicencia,
-                'estado' => $ACPV->conductor->estado,
-                'usuario' => $ACPV->conductor->usuario ? [
-                    'email' => $ACPV->conductor->usuario->email,
-                    'nombreCompleto' => $ACPV->conductor->usuario->nombreCompleto,
-                    'documentoIdentidad' => $ACPV->conductor->usuario->documentoIdentidad,
-                    'userStatus' => $ACPV->conductor->usuario->estado->estado ?? null,
-                ] : null
-            ] : null,
-            'vehiculo' => $ACPV->vehiculo ? [
-                'placa' => $ACPV->vehiculo->placa,
-                'marca' => $ACPV->vehiculo->marcaVehiculo,
-            ] : null
-        ];
-
-        return [
-            'success' => true,
-            'message' => 'Asignación de conductor por vehículo encontrada',
-            'data' => $ACPV,
-            'status' => 200
-        ];
-    } catch (ModelNotFoundException $e) {
+            return [
+                'success' => true,
+                'message' => 'Asignación de conductor por vehículo encontrada',
+                'data' => $ACPV,
+                'status' => 200
+            ];
+        } catch (ModelNotFoundException $e) {
         return [
             'success' => false,
             'message' => 'No se encontró la asignación de conductor por vehículo',

@@ -20,8 +20,8 @@ class VerificarAsignacionVehiculosConConductores
                 ];
             }
 
-            // 2) Buscar conductor y usuario asociado
-            $conductor = Conductores::with('usuario.estado')->find($data['idConductor']);
+            // 2) Buscar conductor y sus estados relacionados (conductor independiente de usuarios)
+            $conductor = Conductores::with(['estadoConductor', 'estadoConductor_Control_Indentidades'])->find($data['idConductor']);
             if (! $conductor) {
                 return [
                     'success' => false,
@@ -29,15 +29,13 @@ class VerificarAsignacionVehiculosConConductores
                     'status'  => 404,
                 ];
             }
-            // 2a) Usuario activo
-            if (
-                !isset($conductor->usuario) ||
-                !isset($conductor->usuario->estado) ||
-                $conductor->usuario->estado->estado !== 'ACTIVO'
-            ) {
+            // 2a) Verificar control de identidad (estado) del conductor
+            // usamos la relación idestado_Usuario_control_indentidades -> estado.idestado
+            $identityState = $conductor->estadoConductor_Control_Indentidades ?? null;
+            if (! $identityState || ! isset($identityState->estado) || strtoupper($identityState->estado) !== 'ACTIVO') {
                 return [
                     'success' => false,
-                    'message' => 'Usuario del conductor no está activo',
+                    'message' => 'Estado de identidad del conductor no está ACTIVO',
                     'status'  => 400,
                 ];
             }
