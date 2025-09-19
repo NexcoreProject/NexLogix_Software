@@ -21,6 +21,8 @@ export interface IAsignacionVehiculo {
     idAsignacion: number;
     fecha_asignacion_vehiculo: string;
     fecha_entrega_vehiculo: string | null;
+    idConductor?: number;
+    idVehiculo?: number;
     conductor: IConductor | {
         licencia: string;
         tipoLicencia: string;

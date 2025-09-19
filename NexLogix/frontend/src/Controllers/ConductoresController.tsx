@@ -18,7 +18,8 @@ const ESTADOS_CONDUCTORES_URL = `${BASE_URL}/gestion_estado_conductores`;
 
 export class ConductoresController {
     // Raw shape returned by backend (examples provided by backend)
-    private static mapApiToIConductor(raw: IConductorRaw): IConductor {
+    // Exposed as public static so other controllers can reuse the mapping
+    static mapApiToIConductor(raw: IConductorRaw): IConductor {
         // safe extraction with runtime checks
         const documento = typeof raw['c_documentoIdentidad'] === 'string'
             ? (raw['c_documentoIdentidad'] as string)

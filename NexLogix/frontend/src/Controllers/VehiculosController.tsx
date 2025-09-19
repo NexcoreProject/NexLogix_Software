@@ -5,7 +5,8 @@ import {
     IAsignacionVehiculo, 
     IAsignacionVehiculoApiResponse 
 } from '../models/Interfaces/IVehiculo';
-import { IConductor, IConductorApiResponse } from '../models/Interfaces/IConductor';
+import { IConductor, IConductorApiResponse, IConductorRaw } from '../models/Interfaces/IConductor';
+import { ConductoresController } from './ConductoresController';
 
 export class VehiculosController {
     // Obtener todos los vehículos
@@ -66,8 +67,41 @@ export class VehiculosController {
     // Obtener asignaciones de conductores por vehículo
     static async getAsignacionesConductores(): Promise<IAsignacionVehiculo[]> {
         try {
-            const response = await axiosInstance.get<IAsignacionVehiculoApiResponse>('http://127.0.0.1:8000/api/gestion_asignacion_conductores_por_vehiculos');
-            return response.data.data;
+            const response = await axiosInstance.get<{ success: boolean; data: unknown[] }>('http://127.0.0.1:8000/api/gestion_asignacion_conductores_por_vehiculos');
+            const raw = Array.isArray(response.data.data) ? response.data.data as unknown[] : [];
+            // Normalize each assignment to ensure ids and conductor flat shape
+            const normalized = raw.map(item => {
+                const r = (item as Record<string, unknown>);
+                // r may include conductor nested in raw backend shape (flat c_* or old usuario)
+                const conductorCandidate = (r['conductor'] ?? r) as Record<string, unknown>;
+                let conductorMapped: IConductor;
+                try {
+                    conductorMapped = ConductoresController.mapApiToIConductor(conductorCandidate as IConductorRaw);
+                } catch (mapErr) {
+                    // fallback: try to coerce minimal fields and log the mapping error
+                    console.warn('ConductoresController.mapApiToIConductor failed, using fallback mapping:', mapErr);
+                    conductorMapped = {
+                        idConductor: Number(r['idConductor'] ?? conductorCandidate['idConductor'] ?? 0),
+                        documentoIdentidad: String(conductorCandidate['c_documentoIdentidad'] ?? conductorCandidate['documentoIdentidad'] ?? ''),
+                        nombreCompleto: String(conductorCandidate['c_nombreCompleto'] ?? (conductorCandidate['usuario'] && (conductorCandidate['usuario'] as Record<string, unknown>)['nombreCompleto']) ?? ''),
+                        email: String(conductorCandidate['c_email'] ?? (conductorCandidate['usuario'] && (conductorCandidate['usuario'] as Record<string, unknown>)['email']) ?? ''),
+                        licencia: String(conductorCandidate['licencia'] ?? ''),
+                        tipoLicencia: String(conductorCandidate['tipoLicencia'] ?? ''),
+                        vigenciaLicencia: String(conductorCandidate['vigenciaLicencia'] ?? ''),
+                    } as IConductor;
+                }
+
+                return {
+                    idAsignacion: Number(r['idAsignacion'] ?? r['id'] ?? 0),
+                    fecha_asignacion_vehiculo: String(r['fecha_asignacion_vehiculo'] ?? r['fechaAsignacion'] ?? ''),
+                    fecha_entrega_vehiculo: (r['fecha_entrega_vehiculo'] ?? r['fecha_entrega'] ?? null) as string | null,
+                    idConductor: (r['idConductor'] ?? (conductorCandidate['idConductor'] ?? conductorMapped.idConductor)) as number | undefined,
+                    idVehiculo: (r['idVehiculo'] ?? ((r['vehiculo'] as Record<string, unknown>)?.['idVehiculo'] ?? undefined)) as number | undefined,
+                    conductor: conductorMapped,
+                    vehiculo: (r['vehiculo'] as Record<string, unknown>) ?? { placa: String(r['placa'] ?? ''), marca: String(r['marcaVehiculo'] ?? r['marca'] ?? '') }
+                } as IAsignacionVehiculo;
+            });
+            return normalized;
         } catch (error) {
             console.error('Error al obtener asignaciones:', error);
             throw error;

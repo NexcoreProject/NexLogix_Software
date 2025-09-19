@@ -38,6 +38,21 @@ const toVehiculoUI = (v: IVehiculo, conductorAsignado: string = "Por asignar"): 
 });
 
 const GestionVehiculos = () => {
+  // Helper to extract conductor's display name from either new flat IConductor or legacy conductor.usuario
+  const extractConductorNombre = (conductor?: IConductor | { usuario?: { nombreCompleto?: string } } | null): string | undefined => {
+    if (!conductor) return undefined;
+    // If the conductor has the new flat property
+    if ('nombreCompleto' in conductor && typeof conductor.nombreCompleto === 'string' && conductor.nombreCompleto.trim() !== '') {
+      return conductor.nombreCompleto;
+    }
+    // Legacy shape: conductor.usuario.nombreCompleto
+    const maybe = conductor as unknown as Record<string, unknown>;
+    const usuario = maybe['usuario'] as Record<string, unknown> | undefined;
+    if (usuario && typeof usuario['nombreCompleto'] === 'string') return usuario['nombreCompleto'] as string;
+    // Backend raw may have c_nombreCompleto
+    if (typeof maybe['c_nombreCompleto'] === 'string') return maybe['c_nombreCompleto'] as string;
+    return undefined;
+  };
   const [vehiculos, setVehiculos] = useState<VehiculoUI[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -69,7 +84,7 @@ const GestionVehiculos = () => {
         // Convertir los vehículos a formato UI con sus conductores asignados
         const vehiculosConConductores = data.map(v => {
           const asignacion = asignaciones.find(a => a.vehiculo.placa === v.placa);
-          return toVehiculoUI(v, asignacion ? asignacion.conductor.usuario.nombreCompleto : undefined);
+          return toVehiculoUI(v, asignacion ? extractConductorNombre(asignacion.conductor) : undefined);
         });
         setVehiculos(vehiculosConConductores);
       } catch (error) {
@@ -114,7 +129,7 @@ const GestionVehiculos = () => {
         const asignaciones = await VehiculosController.getAsignacionesConductores();
         const vehiculosConConductores = data.map(v => {
           const asignacion = asignaciones.find(a => a.vehiculo.placa === v.placa);
-          return toVehiculoUI(v, asignacion ? asignacion.conductor.usuario.nombreCompleto : undefined);
+          return toVehiculoUI(v, asignacion ? extractConductorNombre(asignacion.conductor) : undefined);
         });
         setVehiculos(vehiculosConConductores);
       } catch (error) {
@@ -148,10 +163,10 @@ const GestionVehiculos = () => {
       // Recargar la lista después de crear
       const data = await VehiculosController.getAllVehiculos();
       const asignaciones = await VehiculosController.getAsignacionesConductores();
-      const vehiculosConConductores = data.map(v => {
-        const asignacion = asignaciones.find(a => a.vehiculo.placa === v.placa);
-        return toVehiculoUI(v, asignacion ? asignacion.conductor.usuario.nombreCompleto : undefined);
-      });
+        const vehiculosConConductores = data.map(v => {
+          const asignacion = asignaciones.find(a => a.vehiculo.placa === v.placa);
+          return toVehiculoUI(v, asignacion ? extractConductorNombre(asignacion.conductor) : undefined);
+        });
       setVehiculos(vehiculosConConductores);
     } catch (error) {
       const apiError = error as ApiError;
@@ -185,7 +200,7 @@ const GestionVehiculos = () => {
       const asignaciones = await VehiculosController.getAsignacionesConductores();
       const vehiculosConConductores = data.map(v => {
         const asignacion = asignaciones.find(a => a.vehiculo.placa === v.placa);
-        return toVehiculoUI(v, asignacion ? asignacion.conductor.usuario.nombreCompleto : undefined);
+        return toVehiculoUI(v, asignacion ? extractConductorNombre(asignacion.conductor) : undefined);
       });
       setVehiculos(vehiculosConConductores);
     } catch (error) {
@@ -213,10 +228,10 @@ const GestionVehiculos = () => {
       // Recargar la lista después de asignar
       const data = await VehiculosController.getAllVehiculos();
       const asignaciones = await VehiculosController.getAsignacionesConductores();
-      const vehiculosConConductores = data.map(v => {
-        const asignacion = asignaciones.find(a => a.vehiculo.placa === v.placa);
-        return toVehiculoUI(v, asignacion ? asignacion.conductor.usuario.nombreCompleto : undefined);
-      });
+        const vehiculosConConductores = data.map(v => {
+          const asignacion = asignaciones.find(a => a.vehiculo.placa === v.placa);
+          return toVehiculoUI(v, asignacion ? extractConductorNombre(asignacion.conductor) : undefined);
+        });
       setVehiculos(vehiculosConConductores);
     } catch (error) {
       const apiError = error as ApiError;
@@ -655,9 +670,18 @@ const GestionVehiculos = () => {
               <div className="list-group mt-1" style={{ maxHeight: 120, overflowY: "auto" }}>
                 {conductorSearch &&
                   conductores
-                    .filter(c =>
-                      c.usuario.nombreCompleto.toLowerCase().includes(conductorSearch.toLowerCase())
-                    )
+                    .filter(c => {
+                      const nombre = extractConductorNombre(c) ?? '';
+                      const crecord = c as unknown as Record<string, unknown>;
+                      const email = crecord['c_email'] ?? crecord['email'] ?? '';
+                      const doc = crecord['c_documentoIdentidad'] ?? crecord['documentoIdentidad'] ?? '';
+                      const q = conductorSearch.toLowerCase();
+                      return (
+                        String(nombre).toLowerCase().includes(q) ||
+                        String(email).toLowerCase().includes(q) ||
+                        String(doc).toLowerCase().includes(q)
+                      );
+                    })
                     .map(c => (
                       <button
                         type="button"
@@ -665,14 +689,14 @@ const GestionVehiculos = () => {
                         className={`list-group-item list-group-item-action${selectedConductor?.idConductor === c.idConductor ? " active" : ""}`}
                         onClick={() => setSelectedConductor(c)}
                       >
-                        {c.usuario.nombreCompleto}
+                        {extractConductorNombre(c) ?? ''}
                       </button>
                     ))}
               </div>
             </div>
             {selectedConductor && (
               <div className="alert alert-info py-2 px-2">
-                <div><b>Nombre:</b> {selectedConductor.usuario.nombreCompleto}</div>
+                <div><b>Nombre:</b> {extractConductorNombre(selectedConductor) ?? ''}</div>
                 <div><b>Licencia:</b> {selectedConductor.licencia}</div>
                 <div><b>Tipo de Licencia:</b> {selectedConductor.tipoLicencia}</div>
                 <div><b>Estado:</b> {selectedConductor.estado}</div>
@@ -695,7 +719,7 @@ const GestionVehiculos = () => {
                         await handleAssignDriver(selectedVehicleForDriver.id, selectedConductor.idConductor);
                         setVehiculos(vehiculos.map(v =>
                           v.id === selectedVehicleForDriver.id
-                            ? { ...v, conductorAsignado: selectedConductor.usuario.nombreCompleto }
+                            ? { ...v, conductorAsignado: extractConductorNombre(selectedConductor) ?? '' }
                             : v
                         ));
                         setShowAssignDriverModal(false);
