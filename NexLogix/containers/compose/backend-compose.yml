@@ -1,0 +1,43 @@
+
+services:
+  php:
+    container_name: nexlogix_php
+    build:
+      context: ..
+      dockerfile: containers/dockerfiles/Dockerfile.backend
+      args:
+        UID: 1000
+        GID: 1000
+    working_dir: /var/www/html
+    volumes:
+      - ../backend:/var/www/html
+      - vendor:/var/www/html/vendor
+      - storage:/var/www/html/storage
+    environment:
+      APP_ENV: local
+      PHP_MEMORY_LIMIT: 512M
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - backend
+
+  nginx:
+    container_name: nexlogix_nginx
+    image: nginx:1.24-alpine
+    depends_on:
+      - php
+    ports:
+      - "8000:80"
+    volumes:
+      - ../backend:/var/www/html:ro
+      - ./dockerfiles/nginx.config:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - backend
+volumes:
+  vendor:
+  storage:
+
+networks:
+  backend:
+    driver: bridge
+

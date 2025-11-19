@@ -1,0 +1,77 @@
+## Backend Dockerfile for Laravel (PHP 8.2 FPM)
+## Multi-purpose: dev (with bind mount) and prod (with copy)
+
+FROM php:8.2.12-fpm AS base
+
+# Install system dependencies and PHP extensions commonly needed by Laravel
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends \
+	   git \
+	   unzip \
+	   libzip-dev \
+	   libpng-dev \
+	   libjpeg62-turbo-dev \
+	   libfreetype6-dev \
+	   libonig-dev \
+	   libicu-dev \
+	   libsqlite3-dev \
+	   libpq-dev \
+	&& docker-php-ext-configure gd --with-freetype --with-jpeg \
+	&& docker-php-ext-install -j"$(nproc)" \
+	   bcmath \
+	   exif \
+	   gd \
+	   intl \
+	   opcache \
+	   pcntl \
+	   pdo \
+	   pdo_mysql \
+	   pdo_pgsql \
+	   pdo_sqlite \
+	   zip \
+	&& rm -rf /var/lib/apt/lists/*
+
+# Install Composer (2.x). Copy the binary from the official image to keep it small
+COPY --from=composer:2.8.8 /usr/bin/composer /usr/bin/composer
+
+# Working directory inside the container
+WORKDIR /var/www/html
+
+# Default PHP settings tuned for Laravel
+RUN { \
+	  echo "memory_limit=512M"; \
+	  echo "upload_max_filesize=64M"; \
+	  echo "post_max_size=64M"; \
+	  echo "max_execution_time=120"; \
+	  echo "opcache.enable=1"; \
+	  echo "opcache.validate_timestamps=1"; \
+	  echo "opcache.revalidate_freq=2"; \
+	} > /usr/local/etc/php/conf.d/laravel.ini
+
+# Create non-root user to match common host UID/GID during development
+ARG UID=1000
+ARG GID=1000
+RUN groupadd -g ${GID} www \
+	&& useradd -u ${UID} -ms /bin/bash -g www www \
+	&& chown -R www:www /var/www
+
+USER www
+
+# Copy only composer manifests first to leverage Docker layer caching (for prod builds)
+# In dev with volume mounts, this step will be bypassed effectively at runtime
+COPY --chown=www:www backend/composer.json backend/composer.lock* ./
+
+# Install PHP dependencies (no scripts yet to avoid needing the app code)
+RUN if [ -f composer.json ]; then \
+	  composer install --no-scripts --no-plugins --prefer-dist --no-dev --no-interaction; \
+	fi
+
+# Final stage (same as base; kept as a separate target for clarity/extension)
+FROM base AS runtime
+
+# Expose PHP-FPM port
+EXPOSE 9000
+
+# Default command
+CMD ["php-fpm"]
+
