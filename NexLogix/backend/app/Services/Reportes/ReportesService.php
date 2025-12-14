@@ -41,7 +41,7 @@ class ReportesService
 
     public function getAllReportesPaginated(int $page = 1): array
     {
-        $perPage = 15;
+        $perPage = 12;
         try {
             $page = max(1, (int) $page);
 

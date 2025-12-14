@@ -6,7 +6,8 @@ const BASE_URL = 'http://127.0.0.1:8000/api';
 const CATEGORIAS_URL = `${BASE_URL}/gestion_categoria_reportes`;
 
 export const useCategoriaReportesController = () => {
-	const [categorias, setCategorias] = useState<ICategoriaReporte[]>([]);
+	const [categorias, setCategorias] = useState<ICategoriaReporte[]>([]); // paginated current page
+	const [allCategorias, setAllCategorias] = useState<ICategoriaReporte[]>([]); // full list for selects
 	const [loading, setLoading] = useState(false);
 	const [currentPage, setCurrentPage] = useState<number>(1);
 	const [lastPageSize, setLastPageSize] = useState<number>(0);
@@ -48,6 +49,34 @@ export const useCategoriaReportesController = () => {
 		}
 	};
 
+	// Fetch all categories across pages and accumulate them for selects
+	const fetchAllCategorias = async () => {
+		setLoading(true);
+		try {
+			const accumulated: ICategoriaReporte[] = [];
+			let page = 1;
+			while (true) {
+				const url = `${CATEGORIAS_URL}/page/${page}/2`;
+				const response = await axiosInstance.get<ICategoriaReporte_ApiResponse<ICategoriaReporte[]>>(url);
+				if (!response.data || !response.data.success) break;
+				const data = response.data.data || [];
+				if (!Array.isArray(data) || data.length === 0) break;
+				accumulated.push(...data);
+				if (data.length < PER_PAGE) break; // last page
+				page += 1;
+			}
+			// deduplicate by idcategoria (safety)
+			const map = new Map<number, ICategoriaReporte>();
+			for (const c of accumulated) map.set(c.idcategoria, c);
+			setAllCategorias(Array.from(map.values()));
+		} catch (error) {
+			console.error('Error fetchAllCategorias:', error);
+			setAllCategorias([]);
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	const createCategoria = async (data: { nombreCategoria: string }) => {
 		try {
 			const response = await axiosInstance.post<ICategoriaReporte_ApiResponse<ICategoriaReporte>>(CATEGORIAS_URL, data);
@@ -79,7 +108,10 @@ export const useCategoriaReportesController = () => {
 	};
 
 	useEffect(() => {
+		// load paginated list for admin list view
 		cargarCategorias(1);
+		// also prefetch all categories in background for select controls
+		fetchAllCategorias();
 	}, []);
 
 	return {
@@ -91,6 +123,8 @@ export const useCategoriaReportesController = () => {
 		setPage,
 		hasNext: lastPageSize === PER_PAGE,
 		getById,
+		fetchAllCategorias,
+		allCategorias,
 		createCategoria,
 		updateCategoria,
 		deleteCategoria,

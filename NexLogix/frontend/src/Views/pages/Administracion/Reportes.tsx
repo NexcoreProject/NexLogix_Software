@@ -6,9 +6,11 @@ import './../../Styles/NavBar/Logistica/ListaVehiculos.css';
 import '../../Styles/Home/TablesStyle.css'
 import { useReportesController } from '../../../Controllers/Reportes/ReportesController';
 import { IReporte } from '../../../models/Interfaces/IReportes';
+import { useCategoriaReportesController } from '../../../Controllers/CategoriaReportes/CategoriaReportesController';
 
 const Reportes: React.FC = () => {
-  const { reportes, setReportes, cargarReportes, useCase } = useReportesController();
+  const { reportes, setReportes, cargarReportes, currentPage, setPage, hasNext, loading, createReport, updateReport, deleteReport } = useReportesController();
+  const { categorias, allCategorias, fetchAllCategorias, loading: categoriasLoading } = useCategoriaReportesController();
   const [searchId, setSearchId] = useState("");
   const [filteredReportes, setFilteredReportes] = useState<IReporte[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -18,8 +20,9 @@ const Reportes: React.FC = () => {
   const [selectedReporte, setSelectedReporte] = useState<IReporte | null>(null);
 
   // Formularios controlados
-  const [formTipo, setFormTipo] = useState('');
   const [formDescripcion, setFormDescripcion] = useState('');
+  const [selectedCategoryForForm, setSelectedCategoriaForForm] = useState<number | undefined>(undefined);
+  const [formErrors, setFormErrors] = useState<string[]>([]);
 
   useEffect(() => {
     cargarReportes();
@@ -42,44 +45,104 @@ const Reportes: React.FC = () => {
     setFilteredReportes(reportes);
   };
 
-  // Crear reporte
+  // Crear reporte (envía sólo descripción + categoría)
   const handleCreate = async () => {
+    const tipo = selectedCategoryForForm ? (allCategorias.find(c => c.idcategoria === selectedCategoryForForm)?.nombreCategoria || 'Otro') : 'Otro';
     const data = {
-      tipoReporte: formTipo,
-      descripcion: formDescripcion
+      tipoReporte: tipo,
+      descripcion: formDescripcion,
+      idcategoriaReportes: Number(selectedCategoryForForm) || undefined
     };
-    const res = await useCase.create(data);
-    if (res.success && res.data) {
-      setReportes([...reportes, res.data]);
-      setShowCreateModal(false);
-      setFormTipo('');
-      setFormDescripcion('');
-      await cargarReportes(); // Recargar la lista completa
+    setFormErrors([]);
+    console.log('Crear reporte - payload:', data);
+    try {
+      const res = await createReport(data);
+      console.log('Crear reporte - respuesta:', res);
+      if (res.success && res.data) {
+        setShowCreateModal(false);
+        setFormDescripcion('');
+        setSelectedCategoriaForForm(undefined);
+      } else {
+        const msgs: string[] = [];
+        if (res.message) msgs.push(res.message);
+        if (res.errors) {
+          // res.errors may be Record<string,string> or Record<string,string[]>
+          for (const k of Object.keys(res.errors)) {
+            const v: any = (res.errors as any)[k];
+            if (Array.isArray(v)) msgs.push(...v.map((s: any) => String(s)));
+            else msgs.push(String(v));
+          }
+        }
+        setFormErrors(msgs.length ? msgs : ['No se pudo crear el reporte: respuesta inválida']);
+      }
+    } catch (error: any) {
+      console.error('Error al crear reporte:', error);
+      const resp = error?.response?.data;
+      if (resp?.errors) {
+        const msgs: string[] = [];
+        for (const k of Object.keys(resp.errors)) {
+          const v = resp.errors[k];
+          if (Array.isArray(v)) msgs.push(...v.map((s: any) => String(s)));
+          else msgs.push(String(v));
+        }
+        setFormErrors(msgs);
+      } else {
+        setFormErrors([resp?.message || error.message || 'Error desconocido al crear reporte']);
+      }
     }
   };
 
   // Editar reporte
   const handleEdit = (reporte: IReporte) => {
     setEditReporte(reporte);
-    setFormTipo(reporte.tipoReporte);
     setFormDescripcion(reporte.descripcion);
+    setSelectedCategoriaForForm(reporte.idcategoriaReportes ?? undefined);
     setShowEditModal(true);
   };
 
   const handleUpdate = async () => {
     if (!editReporte) return;
-    const data = {
-      tipoReporte: formTipo,
-      descripcion: formDescripcion
-      // NO incluyas fechaCreacion aquí
+    const tipo = selectedCategoryForForm ? (allCategorias.find(c => c.idcategoria === selectedCategoryForForm)?.nombreCategoria || 'Otro') : 'Otro';
+    const data: Partial<Omit<IReporte, 'idReporte' | 'users' | 'categoria_reportes'>> & { idcategoriaReportes?: number; tipoReporte?: string } = {
+      tipoReporte: tipo,
+      descripcion: formDescripcion,
+      idcategoriaReportes: Number(selectedCategoryForForm) || undefined
     };
-    const res = await useCase.update(editReporte.idReporte, data);
-    if (res.success && res.data) {
-      setReportes(reportes.map(r => r.idReporte === editReporte.idReporte ? res.data : r));
-      setShowEditModal(false);
-      setEditReporte(null);
-      await cargarReportes(); // Recargar la lista completa
-
+    setFormErrors([]);
+    console.log('Actualizar reporte - payload:', data);
+    try {
+      const res = await updateReport(editReporte.idReporte, data);
+      console.log('Actualizar reporte - respuesta:', res);
+      if (res.success && res.data) {
+        setShowEditModal(false);
+        setEditReporte(null);
+        setSelectedCategoriaForForm(undefined);
+      } else {
+        const msgs: string[] = [];
+        if (res.message) msgs.push(res.message);
+        if (res.errors) {
+          for (const k of Object.keys(res.errors)) {
+            const v: any = (res.errors as any)[k];
+            if (Array.isArray(v)) msgs.push(...v.map((s: any) => String(s)));
+            else msgs.push(String(v));
+          }
+        }
+        setFormErrors(msgs.length ? msgs : ['No se pudo actualizar el reporte: respuesta inválida']);
+      }
+    } catch (error: any) {
+      console.error('Error al actualizar reporte:', error);
+      const resp = error?.response?.data;
+      if (resp?.errors) {
+        const msgs: string[] = [];
+        for (const k of Object.keys(resp.errors)) {
+          const v = resp.errors[k];
+          if (Array.isArray(v)) msgs.push(...v.map((s: any) => String(s)));
+          else msgs.push(String(v));
+        }
+        setFormErrors(msgs);
+      } else {
+        setFormErrors([resp?.message || error.message || 'Error desconocido al actualizar reporte']);
+      }
     }
   };
 
@@ -91,9 +154,8 @@ const Reportes: React.FC = () => {
 
   const confirmDelete = async () => {
     if (!selectedReporte) return;
-    const res = await useCase.delete(selectedReporte.idReporte);
+    const res = await deleteReport(selectedReporte.idReporte);
     if (res.success) {
-      setReportes(reportes.filter(r => r.idReporte !== selectedReporte.idReporte));
       setShowDeleteModal(false);
       setSelectedReporte(null);
     }
@@ -122,14 +184,14 @@ const Reportes: React.FC = () => {
                     onChange={e => setSearchId(e.target.value)}
                     style={{ minWidth: 0, borderRadius: '0.5rem' }}
                   />
-                <div className="d-flex gap-2 ms-2">
+                  <div className="d-flex gap-2 ms-2">
                   <button className="btn btn-primary" style={{ minWidth: 140 }} onClick={handleSearch}>
                     Buscar por ID
                   </button>
                   <button className="btn btn-success" style={{ minWidth: 140 }} onClick={resetSearch}>
                     Mostrar todos
                   </button>
-                  <button className="btn btn-warning" style={{ minWidth: 140, width: "100%" }} onClick={() => setShowCreateModal(true)}>
+                  <button className="btn btn-warning" style={{ minWidth: 140, width: "100%" }} onClick={async () => { if (allCategorias.length === 0) await fetchAllCategorias(); setFormErrors([]); setShowCreateModal(true); }}>
                     Crear reporte
                   </button>
                 </div>
@@ -146,6 +208,7 @@ const Reportes: React.FC = () => {
                     <th>Descripción</th>
                     <th>Fecha de Creación</th>
                     <th>Usuario</th>
+                    <th>Categoría</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
@@ -154,10 +217,11 @@ const Reportes: React.FC = () => {
                     filteredReportes.map((reporte) => (
                       <tr key={reporte.idReporte}>
                         <td>{reporte.idReporte}</td>
-                        <td>{reporte.tipoReporte}</td>
+                        <td>{reporte.tipoReporte ?? (reporte.categoria_reportes ? reporte.categoria_reportes.nombreCategoria : '')}</td>
                         <td>{reporte.descripcion}</td>
                         <td>{reporte.fechaCreacion}</td>
                         <td>{reporte.users ? reporte.users.nombreCompleto : ''}</td>
+                        <td>{reporte.categoria_reportes ? reporte.categoria_reportes.nombreCategoria : ''}</td>
                         <td>
                           <div className="d-flex gap-2 justify-content-center">
                             <OverlayTrigger placement="top" overlay={<Tooltip>Editar</Tooltip>}>
@@ -175,14 +239,28 @@ const Reportes: React.FC = () => {
                       </tr>
                     ))
                   ) : (
-                    <tr>
-                      <td colSpan={6} className="text-center py-4">
+                      <tr>
+                      <td colSpan={7} className="text-center py-4">
                         <div className="text-muted">No se encontraron reportes</div>
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
+            </div>
+            {/* Pagination */}
+            <div className="d-flex justify-content-between align-items-center mt-3">
+              <div />
+              <div className="d-flex gap-2 align-items-center">
+                <button className="btn btn-outline-secondary" disabled={currentPage <= 1 || loading} onClick={() => setPage(currentPage - 1)}>
+                  Anterior
+                </button>
+                <div className="text-white">Página {currentPage}</div>
+                <button className="btn btn-outline-secondary" disabled={!hasNext || loading} onClick={() => setPage(currentPage + 1)}>
+                  Siguiente
+                </button>
+              </div>
+              <div />
             </div>
           </div>
         </div>
@@ -194,14 +272,27 @@ const Reportes: React.FC = () => {
               <h5 className="modal-title">Crear Reporte</h5>
               <form onSubmit={e => { e.preventDefault(); handleCreate(); }}>
                 <div className="crear-conductor-form">
-                  <div className="mb-2">
-                    <label className="form-label">Tipo de Reporte</label>
-                    <input className="form-control" value={formTipo} onChange={e => setFormTipo(e.target.value)} required />
-                  </div>
+                  {/* Tipo de Reporte eliminado: backend usa sólo categoría + descripción */}
                   <div className="mb-2">
                     <label className="form-label">Descripción</label>
                     <input className="form-control" value={formDescripcion} onChange={e => setFormDescripcion(e.target.value)} required />
                   </div>
+                  <div className="mb-2">
+                    <label className="form-label">Categoría</label>
+                    <select className="form-select" value={selectedCategoryForForm ?? ''} onChange={e => setSelectedCategoriaForForm(e.target.value ? Number(e.target.value) : undefined)}>
+                      <option value="">-- Seleccionar categoría --</option>
+                      {allCategorias.map(c => (
+                        <option key={c.idcategoria} value={c.idcategoria}>{c.nombreCategoria}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {formErrors.length > 0 && (
+                    <div className="mb-2">
+                      {formErrors.map((err, i) => (
+                        <div key={i} className="text-danger">{err}</div>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="modal-footer">
                   <button type="button" className="btn btn-secondary" onClick={() => setShowCreateModal(false)}>
@@ -223,15 +314,20 @@ const Reportes: React.FC = () => {
               <h5 className="modal-title">Editar Reporte</h5>
               <form onSubmit={e => { e.preventDefault(); handleUpdate(); }}>
                 <div className="crear-conductor-form">
-                  <div className="mb-2">
-                    <label className="form-label">Tipo de Reporte</label>
-                    <input className="form-control" value={formTipo} onChange={e => setFormTipo(e.target.value)} required />
-                  </div>
+                  {/* Tipo de Reporte eliminado: backend usa sólo categoría + descripción */}
                   <div className="mb-2">
                     <label className="form-label">Descripción</label>
                     <input className="form-control" value={formDescripcion} onChange={e => setFormDescripcion(e.target.value)} required />
                   </div>
-                  
+                  <div className="mb-2">
+                    <label className="form-label">Categoría</label>
+                    <select className="form-select" value={selectedCategoryForForm ?? ''} onChange={e => setSelectedCategoriaForForm(e.target.value ? Number(e.target.value) : undefined)}>
+                      <option value="">-- Seleccionar categoría --</option>
+                      {allCategorias.map(c => (
+                        <option key={c.idcategoria} value={c.idcategoria}>{c.nombreCategoria}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
                 <div className="modal-footer">
                   <button type="button" className="btn btn-secondary" onClick={() => setShowEditModal(false)}>

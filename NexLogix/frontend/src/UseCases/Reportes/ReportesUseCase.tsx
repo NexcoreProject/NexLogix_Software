@@ -2,11 +2,11 @@ import { fetchReportes, createReporte, updateReporte, deleteReporte } from "../.
 import { IReporte, IReporte_ApiResponse } from "../../models/Interfaces/IReportes";
 
 export class ReportesUseCase {
-  async getAllReportes(): Promise<IReporte_ApiResponse<IReporte[]>> {
-    return await fetchReportes();
+  async getAllReportes(page?: number): Promise<IReporte_ApiResponse<IReporte[]>> {
+    return await fetchReportes(page);
   }
 
-  async create(data: { tipoReporte: string; descripcion: string }): Promise<IReporte_ApiResponse<IReporte>> {
+  async create(data: { tipoReporte: string; descripcion: string; idcategoriaReportes?: number }): Promise<IReporte_ApiResponse<IReporte>> {
     return await createReporte(data);
   }
 
