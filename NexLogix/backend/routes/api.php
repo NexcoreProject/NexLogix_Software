@@ -446,6 +446,26 @@ Route::group([
         ->middleware('role:2');
 });
 
+// GESTION REPORTES CONDUCTORES
+use App\Http\Controllers\ControllerReportesConductores;
+
+Route::group([
+    'middleware' => ['api', 'auth:api'],
+    'prefix' => 'gestion_reportes_conductores'
+], function () {
+    // pagination route must be before the '/{id}' route to avoid numeric id conflict
+    Route::get('/page/{page}/{order?}', [ControllerReportesConductores::class, 'getAllRPPage'])
+        ->middleware('role:2,3');
+    Route::get('/{id}', [ControllerReportesConductores::class, 'getRPByID'])
+        ->middleware('role:2,3');
+    Route::post('/', [ControllerReportesConductores::class, 'createRP'])
+        ->middleware('role:2,3');
+    Route::patch('/{id}', [ControllerReportesConductores::class, 'updateRP'])
+        ->middleware('role:2');
+    Route::delete('/{id}', [ControllerReportesConductores::class, 'deleteRP'])
+        ->middleware('role:2');
+});
+
 //
 /// VEHICULOS
 //
