@@ -32,8 +32,7 @@ const ManagerProfile = () => {
       setActiveCollapse('administracion');
     } else if (currentPath.includes('/manager/reportes') || 
                currentPath.includes('/manager/categoriaReportes') || 
-               currentPath.includes('/manager/auditorias') || 
-               currentPath.includes('/manager/logs')) {
+               currentPath.includes('/manager/auditorias')) {
       setActiveCollapse('gestionAuditoriasReportes');
     } else if (currentPath.includes('/manager/vehiculos') || 
                currentPath.includes('/manager/conductores') || 
@@ -118,7 +117,7 @@ const ManagerProfile = () => {
                 {/* Opción Gestión Auditorías y Reportes con submenú */}
                 <div className="nav-item-wrapper">
                   <Link 
-                    className={`modern-nav-item dropdown-toggle ${getParentLinkClass(['/manager/reportes', '/manager/categoriaReportes', '/manager/auditorias', '/manager/logs']).includes('active') ? 'active' : ''}`}
+                    className={`modern-nav-item dropdown-toggle ${getParentLinkClass(['/manager/reportes', '/manager/categoriaReportes', '/manager/auditorias']).includes('active') ? 'active' : ''}`}
                     data-bs-toggle="collapse" 
                     to="#gestionAuditoriasReportes" 
                     role="button" 
@@ -143,10 +142,6 @@ const ManagerProfile = () => {
                       <Link className={`submenu-item ${getLinkClass('/manager/auditorias').includes('active') ? 'active' : ''}`} to="/manager/auditorias">
                         <i className="bi bi-shield-check"></i>
                         <span>Auditorías</span>
-                      </Link>
-                      <Link className={`submenu-item ${getLinkClass('/manager/logs').includes('active') ? 'active' : ''}`} to="/manager/logs">
-                        <i className="bi bi-file-text"></i>
-                        <span>Logs</span>
                       </Link>
                     </div>
                   </div>

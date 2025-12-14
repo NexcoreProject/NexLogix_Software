@@ -39,7 +39,7 @@ import Auditorias from "../Views/pages/Auditorias/Auditorias";
 
 // NUEVAS SECCIONES PARA GESTIÓN AUDITORÍAS Y REPORTES
 import CategoriaReportes from "../Views/pages/CategoriaReportes/CategoriaReportes";
-import Logs from "../Views/pages/Logs/Logs";
+// import Logs from "../Views/pages/Logs/Logs";
 // Rutas privadas para Manager: cuelgan del layout ManagerProfile (sidebar + contenido)
 
 const ProtectedRouteManagers = () => {
@@ -64,7 +64,7 @@ const ProtectedRouteManagers = () => {
         <Route path="reportes" element={<Reportes />} />
         <Route path="categoriaReportes" element={<CategoriaReportes />} />
         <Route path="auditorias" element={<Auditorias />} />
-        <Route path="logs" element={<Logs />} />
+        {/* <Route path="logs" element={<Logs />} /> */}
   {/* Gestión logística */}
         <Route path="ciudades" element={<Ciudades />} />
 

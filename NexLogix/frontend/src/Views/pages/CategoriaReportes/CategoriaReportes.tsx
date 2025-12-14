@@ -161,15 +161,15 @@ const CategoriaReportes: React.FC = () => {
                         <td>{categoria.idcategoria}</td>
                         <td>{categoria.nombreCategoria}</td>
                         <td>
-                          <div className="crud-btn-grid">
-                            <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-edit">Editar</Tooltip>}>
-                              <button className="btn btn-warning btn-sm" onClick={() => handleEdit(categoria)}>
-                                <i className="bi bi-pencil-square"></i>
+                          <div className="d-flex gap-2 justify-content-center">
+                            <OverlayTrigger placement="top" overlay={<Tooltip>Editar</Tooltip>}>
+                              <button className="btn btn-sm btn-primary" onClick={() => handleEdit(categoria)}>
+                                <i className="bi bi-pencil"></i>
                               </button>
                             </OverlayTrigger>
-                            <OverlayTrigger placement="top" overlay={<Tooltip id="tooltip-delete">Eliminar</Tooltip>}>
-                              <button className="btn btn-danger btn-sm" onClick={() => handleDelete(categoria)}>
-                                <i className="bi bi-trash3-fill"></i>
+                            <OverlayTrigger placement="top" overlay={<Tooltip>Eliminar</Tooltip>}>
+                              <button className="btn btn-sm btn-danger" onClick={() => handleDelete(categoria)}>
+                                <i className="bi bi-trash"></i>
                               </button>
                             </OverlayTrigger>
                           </div>
