@@ -4,14 +4,11 @@ import './../../Styles/NavBar/Administracion/GeneralStyle.css';
 import './../../Styles/Home/TablesStyle.css'
 import './../../Styles/NavBar/Logistica/ListaVehiculos.css';
 import '../../Styles/Home/TablesStyle.css'
-
-interface ICategoriaReporte {
-  idcategoria: number;
-  nombreCategoria: string;
-}
+import { useCategoriaReportesController } from '../../../Controllers/CategoriaReportes/CategoriaReportesController';
+import { ICategoriaReporte } from '../../../models/Interfaces/ICategoriaReportes';
 
 const CategoriaReportes: React.FC = () => {
-  const [categorias, setCategorias] = useState<ICategoriaReporte[]>([]);
+  const { categorias, setCategorias, cargarCategorias, createCategoria, updateCategoria, deleteCategoria, currentPage, setPage, hasNext } = useCategoriaReportesController();
   const [searchId, setSearchId] = useState("");
   const [filteredCategorias, setFilteredCategorias] = useState<ICategoriaReporte[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -23,9 +20,11 @@ const CategoriaReportes: React.FC = () => {
   // Formularios controlados
   const [formNombreCategoria, setFormNombreCategoria] = useState('');
 
+  // cargarCategorias se dispara desde el controller hook al montar, pero
+  // dejamos un efecto de respaldo por si se necesita recargar manualmente.
   useEffect(() => {
-    // TODO: Cargar categorías desde el backend
-    // cargarCategorias();
+    // ensure filtered list sync on first render
+    setFilteredCategorias(categorias);
   }, []);
 
   useEffect(() => {
@@ -47,10 +46,19 @@ const CategoriaReportes: React.FC = () => {
 
   // Crear categoría
   const handleCreate = async () => {
-    // TODO: Implementar creación
-    console.log('Crear categoría:', { nombreCategoria: formNombreCategoria });
-    setFormNombreCategoria('');
-    setShowCreateModal(false);
+    try {
+      const res = await createCategoria({ nombreCategoria: formNombreCategoria });
+      if (res && res.success && res.data) {
+        // añadir a lista local y recargar para consistencia
+        setCategorias(prev => [...prev, res.data]);
+        await cargarCategorias();
+      }
+    } catch (error) {
+      console.error('Error creando categoria:', error);
+    } finally {
+      setFormNombreCategoria('');
+      setShowCreateModal(false);
+    }
   };
 
   // Editar categoría
@@ -62,13 +70,18 @@ const CategoriaReportes: React.FC = () => {
 
   const handleUpdate = async () => {
     if (!editCategoria) return;
-    // TODO: Implementar actualización
-    console.log('Actualizar categoría:', { 
-      id: editCategoria.idcategoria, 
-      nombreCategoria: formNombreCategoria 
-    });
-    setShowEditModal(false);
-    setEditCategoria(null);
+    try {
+      const res = await updateCategoria(editCategoria.idcategoria, { nombreCategoria: formNombreCategoria });
+      if (res && res.success && res.data) {
+        setCategorias(prev => prev.map(c => c.idcategoria === editCategoria.idcategoria ? res.data : c));
+        await cargarCategorias();
+      }
+    } catch (error) {
+      console.error('Error actualizando categoria:', error);
+    } finally {
+      setShowEditModal(false);
+      setEditCategoria(null);
+    }
   };
 
   // Eliminar categoría
@@ -79,10 +92,18 @@ const CategoriaReportes: React.FC = () => {
 
   const confirmDelete = async () => {
     if (!selectedCategoria) return;
-    // TODO: Implementar eliminación
-    console.log('Eliminar categoría:', selectedCategoria.idcategoria);
-    setShowDeleteModal(false);
-    setSelectedCategoria(null);
+    try {
+      const res = await deleteCategoria(selectedCategoria.idcategoria);
+      if (res && res.success) {
+        setCategorias(prev => prev.filter(c => c.idcategoria !== selectedCategoria.idcategoria));
+        await cargarCategorias();
+      }
+    } catch (error) {
+      console.error('Error eliminando categoria:', error);
+    } finally {
+      setShowDeleteModal(false);
+      setSelectedCategoria(null);
+    }
   };
 
   return (
@@ -164,6 +185,21 @@ const CategoriaReportes: React.FC = () => {
                   )}
                 </tbody>
               </table>
+            </div>
+
+            {/* Paginación simple */}
+            <div className="d-flex justify-content-between align-items-center mt-3">
+              <div />
+              <div className="d-flex gap-2 align-items-center">
+                <button className="btn btn-outline-secondary" disabled={currentPage <= 1} onClick={() => setPage(currentPage - 1)}>
+                  Anterior
+                </button>
+                <div className="text-white">Página {currentPage}</div>
+                <button className="btn btn-outline-secondary" disabled={!hasNext} onClick={() => setPage(currentPage + 1)}>
+                  Siguiente
+                </button>
+              </div>
+              <div />
             </div>
           </div>
         </div>
