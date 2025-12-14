@@ -102,9 +102,7 @@ const Reportes: React.FC = () => {
 
   const handleUpdate = async () => {
     if (!editReporte) return;
-    const tipo = selectedCategoryForForm ? (allCategorias.find(c => c.idcategoria === selectedCategoryForForm)?.nombreCategoria || 'Otro') : 'Otro';
-    const data: Partial<Omit<IReporte, 'idReporte' | 'users' | 'categoria_reportes'>> & { idcategoriaReportes?: number; tipoReporte?: string } = {
-      tipoReporte: tipo,
+    const data: Partial<Omit<IReporte, 'idReporte' | 'users' | 'categoria_reportes'>> & { idcategoriaReportes?: number } = {
       descripcion: formDescripcion,
       idcategoriaReportes: Number(selectedCategoryForForm) || undefined
     };
@@ -129,19 +127,21 @@ const Reportes: React.FC = () => {
         }
         setFormErrors(msgs.length ? msgs : ['No se pudo actualizar el reporte: respuesta inválida']);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error al actualizar reporte:', error);
-      const resp = error?.response?.data;
+      const axiosErr = error as import('axios').AxiosError<Record<string, unknown>>;
+      const resp = axiosErr?.response?.data as { errors?: Record<string, string | string[]>; message?: string } | undefined;
+      console.error('Server response body:', resp);
       if (resp?.errors) {
         const msgs: string[] = [];
         for (const k of Object.keys(resp.errors)) {
           const v = resp.errors[k];
-          if (Array.isArray(v)) msgs.push(...v.map((s: any) => String(s)));
+          if (Array.isArray(v)) msgs.push(...v.map((s: unknown) => String(s)));
           else msgs.push(String(v));
         }
         setFormErrors(msgs);
       } else {
-        setFormErrors([resp?.message || error.message || 'Error desconocido al actualizar reporte']);
+        setFormErrors([resp?.message || String(axiosErr?.message) || 'Error desconocido al actualizar reporte']);
       }
     }
   };
