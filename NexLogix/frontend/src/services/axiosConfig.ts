@@ -23,7 +23,7 @@ export const axiosInstance = axios.create({
         'Content-Type': 'application/json',
         'Accept': 'application/json'
     },
-    timeout: 10000 // 10 segundos
+    timeout: 30000 // 30 segundos (aumentado temporalmente para evitar timeouts locales)
 });
 
 let navigate: NavigateFunction | null = null;
@@ -50,17 +50,24 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
     response => response,
     error => {
+        // Log a concise, helpful message for devs
+        try {
+            const reqUrl = error?.config?.url ?? '<unknown url>';
+            console.error(`HTTP Error [${reqUrl}]:`, error.message || error);
+        } catch (e) {
+            console.error('HTTP Error (unable to read request):', error);
+        }
+
         if (error.response && error.response.status === 401) {
             localStorage.removeItem("token");
             localStorage.removeItem("userRole");
-            
-            // Preferimos navigate (SPA) y caemos a window.location si aún no lo tenemos
             if (navigate) {
                 navigate("/unauthorized");
             } else {
                 window.location.href = "/unauthorized";
             }
         }
+
         return Promise.reject(error);
     }
 );

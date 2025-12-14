@@ -7,10 +7,14 @@ import '../../Styles/Home/TablesStyle.css'
 import { useReportesController } from '../../../Controllers/Reportes/ReportesController';
 import { IReporte } from '../../../models/Interfaces/IReportes';
 import { useCategoriaReportesController } from '../../../Controllers/CategoriaReportes/CategoriaReportesController';
+import { ConductoresController } from '../../../Controllers/ConductoresController';
+import { IConductor } from '../../../models/Interfaces/IConductor';
+import { useReportesConductoresController } from '../../../Controllers/Reportes/ReportesConductoresController';
 
 const Reportes: React.FC = () => {
-  const { reportes, setReportes, cargarReportes, currentPage, setPage, hasNext, loading, createReport, updateReport, deleteReport } = useReportesController();
-  const { categorias, allCategorias, fetchAllCategorias, loading: categoriasLoading } = useCategoriaReportesController();
+  const { reportes, cargarReportes, currentPage, setPage, hasNext, loading, createReport, updateReport, deleteReport } = useReportesController();
+  const { allCategorias, fetchAllCategorias } = useCategoriaReportesController();
+  const { create: createReporteConductor, loading: creatingReporteConductor, reportesConductores, cargarReportesConductores, currentPage: currentPageRC, hasNext: hasNextRC } = useReportesConductoresController();
   const [searchId, setSearchId] = useState("");
   const [filteredReportes, setFilteredReportes] = useState<IReporte[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -23,10 +27,14 @@ const Reportes: React.FC = () => {
   const [formDescripcion, setFormDescripcion] = useState('');
   const [selectedCategoryForForm, setSelectedCategoriaForForm] = useState<number | undefined>(undefined);
   const [formErrors, setFormErrors] = useState<string[]>([]);
+  const [conductoresList, setConductoresList] = useState<IConductor[]>([]);
+  const [showConductoresModal, setShowConductoresModal] = useState(false);
+  const [selectedConductorForForm, setSelectedConductorForForm] = useState<number | undefined>(undefined);
+  const [viewMode, setViewMode] = useState<'usuario' | 'conductores'>('usuario');
 
   useEffect(() => {
     cargarReportes();
-  }, []);
+  }, [cargarReportes]);
 
   useEffect(() => {
     setFilteredReportes(reportes);
@@ -66,28 +74,29 @@ const Reportes: React.FC = () => {
         const msgs: string[] = [];
         if (res.message) msgs.push(res.message);
         if (res.errors) {
-          // res.errors may be Record<string,string> or Record<string,string[]>
-          for (const k of Object.keys(res.errors)) {
-            const v: any = (res.errors as any)[k];
-            if (Array.isArray(v)) msgs.push(...v.map((s: any) => String(s)));
+          const errors = res.errors as Record<string, string | string[]>;
+          for (const k of Object.keys(errors)) {
+            const v = errors[k];
+            if (Array.isArray(v)) msgs.push(...v.map((s: unknown) => String(s)));
             else msgs.push(String(v));
           }
         }
         setFormErrors(msgs.length ? msgs : ['No se pudo crear el reporte: respuesta inválida']);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error al crear reporte:', error);
-      const resp = error?.response?.data;
+      const axiosErr = error as import('axios').AxiosError<Record<string, unknown>>;
+      const resp = axiosErr?.response?.data as { errors?: Record<string, string | string[]>; message?: string } | undefined;
       if (resp?.errors) {
         const msgs: string[] = [];
         for (const k of Object.keys(resp.errors)) {
           const v = resp.errors[k];
-          if (Array.isArray(v)) msgs.push(...v.map((s: any) => String(s)));
+          if (Array.isArray(v)) msgs.push(...v.map((s: unknown) => String(s)));
           else msgs.push(String(v));
         }
         setFormErrors(msgs);
       } else {
-        setFormErrors([resp?.message || error.message || 'Error desconocido al crear reporte']);
+        setFormErrors([resp?.message || String(axiosErr?.message) || 'Error desconocido al crear reporte']);
       }
     }
   };
@@ -119,9 +128,10 @@ const Reportes: React.FC = () => {
         const msgs: string[] = [];
         if (res.message) msgs.push(res.message);
         if (res.errors) {
-          for (const k of Object.keys(res.errors)) {
-            const v: any = (res.errors as any)[k];
-            if (Array.isArray(v)) msgs.push(...v.map((s: any) => String(s)));
+          const errors = res.errors as Record<string, string | string[]>;
+          for (const k of Object.keys(errors)) {
+            const v = errors[k];
+            if (Array.isArray(v)) msgs.push(...v.map((s: unknown) => String(s)));
             else msgs.push(String(v));
           }
         }
@@ -185,16 +195,54 @@ const Reportes: React.FC = () => {
                     style={{ minWidth: 0, borderRadius: '0.5rem' }}
                   />
                   <div className="d-flex gap-2 ms-2">
-                  <button className="btn btn-primary" style={{ minWidth: 140 }} onClick={handleSearch}>
-                    Buscar por ID
-                  </button>
-                  <button className="btn btn-success" style={{ minWidth: 140 }} onClick={resetSearch}>
-                    Mostrar todos
-                  </button>
-                  <button className="btn btn-warning" style={{ minWidth: 140, width: "100%" }} onClick={async () => { if (allCategorias.length === 0) await fetchAllCategorias(); setFormErrors([]); setShowCreateModal(true); }}>
-                    Crear reporte
-                  </button>
-                </div>
+                    <div className="btn-group">
+                      <button className="btn btn-primary" style={{ minWidth: 140 }} onClick={handleSearch}>
+                        Buscar por ID
+                      </button>
+                    </div>
+                    <div className="btn-group">
+                      <button className="btn btn-success" style={{ minWidth: 140 }} onClick={async () => {
+                        if (viewMode === 'usuario') {
+                          resetSearch();
+                        } else {
+                          setViewMode('usuario');
+                          await cargarReportes();
+                        }
+                      }}>
+                        Mostrar todos
+                      </button>
+                      <button type="button" className="btn btn-success dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false" />
+                      <ul className="dropdown-menu">
+                        <li>
+                          <button className="dropdown-item" onClick={async () => { setViewMode('usuario'); await cargarReportes(); setFilteredReportes(reportes); }}>
+                            Usuario
+                          </button>
+                        </li>
+                        <li>
+                          <button className="dropdown-item" onClick={async () => {
+                            setViewMode('conductores');
+                            if (allCategorias.length === 0) await fetchAllCategorias();
+                            await cargarReportesConductores(1);
+                          }}>
+                            Conductores
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+                    <button className="btn btn-warning" style={{ minWidth: 140, width: "100%" }} onClick={async () => {
+                      if (allCategorias.length === 0) await fetchAllCategorias();
+                      setFormErrors([]);
+                      if (viewMode === 'usuario') {
+                        setShowCreateModal(true);
+                      } else {
+                        const conductores = await ConductoresController.getAllConductores();
+                        setConductoresList(conductores);
+                        setShowConductoresModal(true);
+                      }
+                    }}>
+                      Crear reporte
+                    </button>
+                  </div>
               </div>
             </div>
 
@@ -202,48 +250,110 @@ const Reportes: React.FC = () => {
             <div className="custom-table-wrapper">
               <table className="table custom-table">
                 <thead>
-                  <tr>
-                    <th>ID Reporte</th>
-                    <th>Tipo de Reporte</th>
-                    <th>Descripción</th>
-                    <th>Fecha de Creación</th>
-                    <th>Usuario</th>
-                    <th>Categoría</th>
-                    <th>Acciones</th>
-                  </tr>
+                  {viewMode === 'usuario' ? (
+                    <tr>
+                      <th>ID Reporte</th>
+                      <th>Tipo de Reporte</th>
+                      <th>Descripción</th>
+                      <th>Fecha de Creación</th>
+                      <th>Usuario</th>
+                      <th>Categoría</th>
+                      <th>Acciones</th>
+                    </tr>
+                  ) : (
+                    <tr>
+                      <th>ID Reporte</th>
+                      <th>Descripción</th>
+                      <th>Fecha de Creación</th>
+                      <th>ID Conductor</th>
+                      <th>Nombre</th>
+                      <th>Documento</th>
+                      <th>Teléfono</th>
+                    </tr>
+                  )}
                 </thead>
                 <tbody>
-                  {filteredReportes.length > 0 ? (
-                    filteredReportes.map((reporte) => (
-                      <tr key={reporte.idReporte}>
-                        <td>{reporte.idReporte}</td>
-                        <td>{reporte.tipoReporte ?? (reporte.categoria_reportes ? reporte.categoria_reportes.nombreCategoria : '')}</td>
-                        <td>{reporte.descripcion}</td>
-                        <td>{reporte.fechaCreacion}</td>
-                        <td>{reporte.users ? reporte.users.nombreCompleto : ''}</td>
-                        <td>{reporte.categoria_reportes ? reporte.categoria_reportes.nombreCategoria : ''}</td>
-                        <td>
-                          <div className="d-flex gap-2 justify-content-center">
-                            <OverlayTrigger placement="top" overlay={<Tooltip>Editar</Tooltip>}>
-                              <button className="btn btn-sm btn-primary" onClick={() => handleEdit(reporte)}>
-                                <i className="bi bi-pencil"></i>
-                              </button>
-                            </OverlayTrigger>
-                            <OverlayTrigger placement="top" overlay={<Tooltip>Eliminar</Tooltip>}>
-                              <button className="btn btn-sm btn-danger" onClick={() => handleDelete(reporte)}>
-                                <i className="bi bi-trash"></i>
-                              </button>
-                            </OverlayTrigger>
-                          </div>
+                  {viewMode === 'usuario' ? (
+                    filteredReportes.length > 0 ? (
+                      filteredReportes.map((reporte) => (
+                        <tr key={reporte.idReporte}>
+                          <td>{reporte.idReporte}</td>
+                          <td>{reporte.tipoReporte ?? (reporte.categoria_reportes ? reporte.categoria_reportes.nombreCategoria : '')}</td>
+                          <td>{reporte.descripcion}</td>
+                          <td>{reporte.fechaCreacion}</td>
+                          <td>{reporte.users ? reporte.users.nombreCompleto : ''}</td>
+                          <td>{reporte.categoria_reportes ? reporte.categoria_reportes.nombreCategoria : ''}</td>
+                          <td>
+                            <div className="d-flex gap-2 justify-content-center">
+                              <OverlayTrigger placement="top" overlay={<Tooltip>Editar</Tooltip>}>
+                                <button className="btn btn-sm btn-primary" onClick={() => handleEdit(reporte)}>
+                                  <i className="bi bi-pencil"></i>
+                                </button>
+                              </OverlayTrigger>
+                              <OverlayTrigger placement="top" overlay={<Tooltip>Eliminar</Tooltip>}>
+                                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(reporte)}>
+                                  <i className="bi bi-trash"></i>
+                                </button>
+                              </OverlayTrigger>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={7} className="text-center py-4">
+                          <div className="text-muted">No se encontraron reportes</div>
                         </td>
                       </tr>
-                    ))
+                    )
                   ) : (
+                    reportesConductores && reportesConductores.length > 0 ? (
+                      reportesConductores.map((r) => {
+                          const raw = r as unknown as Record<string, unknown>;
+                          const conductor = (raw['conductor'] as Record<string, unknown> | undefined) ?? undefined;
+                          const idReporte = (raw['idReporte'] as number) ?? undefined;
+                          const descripcion = (raw['descripcion'] as string) ?? '';
+                          const fecha = (raw['fechaCreacion'] as string) ?? '';
+                          const idConductor = typeof raw['idConductor'] === 'number'
+                            ? Number(raw['idConductor'])
+                            : (conductor && typeof conductor['idConductor'] === 'number' ? Number(conductor['idConductor']) : undefined);
+                          const documento = conductor && typeof conductor['c_documentoIdentidad'] === 'string'
+                            ? String(conductor['c_documentoIdentidad'])
+                            : (conductor && typeof conductor['documentoIdentidad'] === 'string' ? String(conductor['documentoIdentidad']) : '');
+                          const telefono = conductor && typeof conductor['c_numContacto'] === 'string'
+                            ? String(conductor['c_numContacto'])
+                            : (conductor && typeof conductor['numContacto'] === 'string' ? String(conductor['numContacto']) : '');
+                        const getConductorNombre = (c?: Record<string, unknown>): string => {
+                          if (!c) return '';
+                          const keys = ['c_nombreCompleto','c_nombre','c_nombres','c_fullname','nombreCompleto','nombre','nombres','fullName'];
+                          for (const k of keys) {
+                            const v = c[k as keyof Record<string, unknown>];
+                            if (typeof v === 'string' && v.trim() !== '') return v.trim();
+                          }
+                          const email = typeof c['c_email'] === 'string' ? String(c['c_email']) : (typeof c['email'] === 'string' ? String(c['email']) : '');
+                          if (email) return email.split('@')[0].replace(/[._-]/g, ' ');
+                          return '';
+                        };
+                        const nombre = getConductorNombre(conductor);
+                        return (
+                          <tr key={idReporte ?? idConductor}>
+                            <td>{idReporte}</td>
+                            <td>{descripcion}</td>
+                            <td>{fecha}</td>
+                            <td>{idConductor ?? ''}</td>
+                            <td>{nombre}</td>
+                            <td>{documento}</td>
+                            <td>{telefono}</td>
+                          </tr>
+                        );
+                      })
+                    ) : (
                       <tr>
-                      <td colSpan={7} className="text-center py-4">
-                        <div className="text-muted">No se encontraron reportes</div>
-                      </td>
-                    </tr>
+                        <td colSpan={7} className="text-center py-4">
+                          <div className="text-muted">No se encontraron reportes de conductores</div>
+                        </td>
+                      </tr>
+                    )
                   )}
                 </tbody>
               </table>
@@ -252,13 +362,27 @@ const Reportes: React.FC = () => {
             <div className="d-flex justify-content-between align-items-center mt-3">
               <div />
               <div className="d-flex gap-2 align-items-center">
-                <button className="btn btn-outline-secondary" disabled={currentPage <= 1 || loading} onClick={() => setPage(currentPage - 1)}>
-                  Anterior
-                </button>
-                <div className="text-white">Página {currentPage}</div>
-                <button className="btn btn-outline-secondary" disabled={!hasNext || loading} onClick={() => setPage(currentPage + 1)}>
-                  Siguiente
-                </button>
+                {viewMode === 'usuario' ? (
+                  <>
+                    <button className="btn btn-outline-secondary" disabled={currentPage <= 1 || loading} onClick={() => setPage(currentPage - 1)}>
+                      Anterior
+                    </button>
+                    <div className="text-white">Página {currentPage}</div>
+                    <button className="btn btn-outline-secondary" disabled={!hasNext || loading} onClick={() => setPage(currentPage + 1)}>
+                      Siguiente
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button className="btn btn-outline-secondary" disabled={currentPageRC <= 1 || creatingReporteConductor} onClick={async () => { await cargarReportesConductores(currentPageRC - 1); }}>
+                      Anterior
+                    </button>
+                    <div className="text-white">Página {currentPageRC}</div>
+                    <button className="btn btn-outline-secondary" disabled={!hasNextRC || creatingReporteConductor} onClick={async () => { await cargarReportesConductores(currentPageRC + 1); }}>
+                      Siguiente
+                    </button>
+                  </>
+                )}
               </div>
               <div />
             </div>
@@ -301,6 +425,79 @@ const Reportes: React.FC = () => {
                   <button type="submit" className="btn btn-success">
                     Guardar
                   </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Modal para crear reporte conductor */}
+        {showConductoresModal && (
+          <div className="crear-conductor-modal-bg">
+            <div className="crear-conductor-modal">
+              <h5 className="modal-title">Crear Reporte - Conductores</h5>
+              <form onSubmit={e => { e.preventDefault(); (async () => {
+                setFormErrors([]);
+                if (!selectedConductorForForm) { setFormErrors(['Selecciona un conductor']); return; }
+                if (!selectedCategoryForForm) { setFormErrors(['Selecciona una categoría']); return; }
+                try {
+                  const payload = { idCategoriaReportes: Number(selectedCategoryForForm), descripcion: formDescripcion, idConductor: Number(selectedConductorForForm) };
+                  console.log('Crear reporte conductor - payload:', payload);
+                  const res = await createReporteConductor(payload);
+                  console.log('Crear reporte conductor - respuesta:', res);
+                  if (res && res.success) {
+                    setShowConductoresModal(false);
+                    setFormDescripcion('');
+                    setSelectedCategoriaForForm(undefined);
+                    setSelectedConductorForForm(undefined);
+                  } else {
+                    const msgs: string[] = [];
+                      if (res?.message) msgs.push(res.message);
+                      const _r = res as unknown as Record<string, unknown> | undefined;
+                      if (_r && _r['errors']) msgs.push(JSON.stringify(_r['errors']));
+                    setFormErrors(msgs.length ? msgs : ['No se pudo crear reporte conductor']);
+                  }
+                } catch (err: unknown) {
+                  console.error('Error crear reporte conductor', err);
+                  const axiosErr = err as import('axios').AxiosError<Record<string, unknown>>;
+                  const resp = axiosErr?.response?.data as { message?: string } | undefined;
+                  setFormErrors([resp?.message || String(axiosErr?.message) || 'Error desconocido']);
+                }
+              })(); }}>
+                <div className="crear-conductor-form">
+                  <div className="mb-2">
+                    <label className="form-label">Descripción</label>
+                    <input className="form-control" value={formDescripcion} onChange={e => setFormDescripcion(e.target.value)} required />
+                  </div>
+                  <div className="mb-2">
+                    <label className="form-label">Categoría</label>
+                    <select className="form-select" value={selectedCategoryForForm ?? ''} onChange={e => setSelectedCategoriaForForm(e.target.value ? Number(e.target.value) : undefined)}>
+                      <option value="">-- Seleccionar categoría --</option>
+                      {allCategorias.map(c => (
+                        <option key={c.idcategoria} value={c.idcategoria}>{c.nombreCategoria}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="mb-2">
+                    <label className="form-label">Conductor</label>
+                    <select className="form-select" value={selectedConductorForForm ?? ''} onChange={e => setSelectedConductorForForm(e.target.value ? Number(e.target.value) : undefined)}>
+                      <option value="">-- Seleccionar conductor --</option>
+                      {conductoresList.map(c => (
+                        <option key={c.idConductor ?? c.idConductor} value={c.idConductor ?? c.idEstadoConductor}>{c.nombreCompleto ?? c.nombreCompleto}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {formErrors.length > 0 && (
+                    <div className="mb-2">
+                      {formErrors.map((err, i) => (
+                        <div key={i} className="text-danger">{err}</div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowConductoresModal(false)}>Cancelar</button>
+                  <button type="submit" className="btn btn-success">Guardar</button>
                 </div>
               </form>
             </div>

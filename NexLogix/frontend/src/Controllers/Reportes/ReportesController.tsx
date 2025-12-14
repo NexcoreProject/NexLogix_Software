@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { ReportesUseCase } from "../../UseCases/Reportes/ReportesUseCase";
 import { IReporte, IReporte_ApiResponse } from "../../models/Interfaces/IReportes";
 
@@ -8,9 +8,9 @@ export const useReportesController = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [perPage, setPerPage] = useState<number>(12);
   const [total, setTotal] = useState<number | null>(null);
-  const useCase = new ReportesUseCase();
+  const useCaseRef = useRef<ReportesUseCase>(new ReportesUseCase());
 
-  const parseAndSet = (res: IReporte_ApiResponse<IReporte[]>) => {
+  const parseAndSet = useCallback((res: IReporte_ApiResponse<IReporte[]>) => {
     if (res.success) {
       setReportes(res.data || []);
       if (res.meta) {
@@ -21,12 +21,12 @@ export const useReportesController = () => {
     } else {
       setReportes([]);
     }
-  };
+  }, [perPage]);
 
-  const cargarReportes = async (page = 1) => {
+  const cargarReportes = useCallback(async (page = 1) => {
     setLoading(true);
     try {
-      const res = await useCase.getAllReportes(page);
+      const res = await useCaseRef.current.getAllReportes(page);
       parseAndSet(res as IReporte_ApiResponse<IReporte[]>);
     } catch (error) {
       console.error('Error cargando reportes:', error);
@@ -34,17 +34,17 @@ export const useReportesController = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [parseAndSet]);
 
-  const setPage = async (page: number) => {
+  const setPage = useCallback(async (page: number) => {
     if (page < 1) return;
     await cargarReportes(page);
-  };
+  }, [cargarReportes]);
 
-  const createReport = async (data: { tipoReporte: string; descripcion: string; idcategoriaReportes?: number }) => {
+  const createReport = useCallback(async (data: { tipoReporte: string; descripcion: string; idcategoriaReportes?: number }) => {
     setLoading(true);
     try {
-      const res = await useCase.create(data);
+      const res = await useCaseRef.current.create(data);
       if (res.success) {
         await cargarReportes(currentPage);
       }
@@ -55,12 +55,12 @@ export const useReportesController = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [cargarReportes, currentPage]);
 
-  const updateReport = async (id: number, data: Partial<Omit<IReporte, 'idReporte' | 'users' | 'categoria_reportes'>> & { idcategoriaReportes?: number }) => {
+  const updateReport = useCallback(async (id: number, data: Partial<Omit<IReporte, 'idReporte' | 'users' | 'categoria_reportes'>> & { idcategoriaReportes?: number }) => {
     setLoading(true);
     try {
-      const res = await useCase.update(id, data);
+      const res = await useCaseRef.current.update(id, data);
       if (res.success) {
         await cargarReportes(currentPage);
       }
@@ -71,12 +71,12 @@ export const useReportesController = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [cargarReportes, currentPage]);
 
-  const deleteReport = async (id: number) => {
+  const deleteReport = useCallback(async (id: number) => {
     setLoading(true);
     try {
-      const res = await useCase.delete(id);
+      const res = await useCaseRef.current.delete(id);
       if (res.success) {
         await cargarReportes(currentPage);
       }
@@ -87,11 +87,11 @@ export const useReportesController = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [cargarReportes, currentPage]);
 
   useEffect(() => {
     cargarReportes(1);
-  }, []);
+  }, [cargarReportes]);
 
   const hasNext = total === null ? (reportes.length === perPage) : (currentPage < (Math.ceil((total || 0) / perPage)));
 
