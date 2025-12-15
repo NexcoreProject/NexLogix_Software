@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { VehiculosController } from "../../../Controllers/VehiculosController";
 import { UserProfileController } from "../../../Controllers/Users/UserController";
 import { IVehiculo } from "../../../models/Interfaces/IVehiculo";
+import { IConductor } from "../../../models/Interfaces/IConductor";
 import { axiosInstance } from "../../../services/axiosConfig";
 
 
@@ -58,7 +59,11 @@ const VehiculosConductor = () => {
         const asignaciones = await VehiculosController.getAsignacionesConductores();
         // Filtrar las asignaciones activas (sin fecha de entrega) para este conductor
         const asignacionesActivas = asignaciones.filter(
-          asig => asig.conductor.usuario.documentoIdentidad && !asig.fecha_entrega_vehiculo
+          asig => {
+            // Type guard para verificar que conductor tiene idConductor
+            const conductor = asig.conductor as IConductor;
+            return conductor.idConductor === conductorId && !asig.fecha_entrega_vehiculo;
+          }
         );
         
         if (asignacionesActivas.length > 0) {

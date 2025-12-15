@@ -12,6 +12,12 @@ ul.dropdown-menu li:first-child .dropdown-item.custom-bg {
   border-top-right-radius: 0.5rem !important;
 }
 
+/* Asegurar que el texto del manual sea blanco siempre */
+ul.dropdown-menu .dropdown-item.custom-bg:active {
+  color: #fff !important;
+  background-color: #232c42 !important;
+}
+
 ul.dropdown-menu li {
   margin-top: 0 !important;
   margin-bottom: 0 !important;
@@ -49,4 +55,25 @@ ul.dropdown-menu .dropdown-item.custom-logout:focus {
 
 ul.navbar-nav.ms-auto {
   margin-right: 24px; /* Ajusta el valor a tu gusto */
+}
+
+/* Dropdown específico del navbar (Configuraciones) */
+ul.navbar-dropdown {
+  background-color: #161625 !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important;
+  padding: 0 !important;
+}
+
+/* Asegurar que el texto del botón Configuraciones sea siempre blanco */
+.navbar-nav .nav-link.dropdown-toggle {
+  color: #fff !important;
+}
+
+.navbar-nav .nav-link.dropdown-toggle:hover,
+.navbar-nav .nav-link.dropdown-toggle:focus,
+.navbar-nav .nav-link.dropdown-toggle:active,
+.navbar-nav .nav-link.dropdown-toggle.show {
+  color: #fff !important;
 }

@@ -1,5 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { Envio, Ciudad, CategoriaEnvio, RecogidaData, EntregaData, EnvioData } from '../../models/Interfaces/IEnvios';
+import { axiosInstance } from '../axiosConfig';
 
 interface ApiResponse<T> {
   success: boolean;
@@ -9,26 +10,17 @@ interface ApiResponse<T> {
   status?: number;
 }
 
-const BASE_URL = 'http://127.0.0.1:8000/api';
-
 // Obtener lista de ciudades
 export const fetchCiudades = async (): Promise<ApiResponse<Ciudad[]>> => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    console.error('fetchCiudades: No se encontró token en localStorage');
-    throw new Error('No autenticado');
-  }
   try {
-    console.log('fetchCiudades: Enviando solicitud a', `${BASE_URL}/gestion_ciudades`);
+    console.log('fetchCiudades: Enviando solicitud a', '/gestion_ciudades');
     const response: AxiosResponse<
       ApiResponse<{
         idCiudad: number;
         nombreCiudad: string;
         costoPor_Ciudad: string;
       }[]>
-    > = await axios.get(`${BASE_URL}/gestion_ciudades`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    > = await axiosInstance.get('/gestion_ciudades');
     console.log('fetchCiudades: Respuesta recibida:', JSON.stringify(response.data, null, 2));
     // Transformar datos para que coincidan con la interfaz Ciudad
     const transformedData: Ciudad[] = response.data.data.map((item) => ({
@@ -60,12 +52,8 @@ export const fetchCiudades = async (): Promise<ApiResponse<Ciudad[]>> => {
 
 // Obtener lista de categorías
 export const fetchCategoriasEnvio = async (): Promise<ApiResponse<CategoriaEnvio[]>> => {
-  const token = localStorage.getItem('token');
-  if (!token) throw new Error('No autenticado');
   try {
-    const response: AxiosResponse<ApiResponse<CategoriaEnvio[]>> = await axios.get(`${BASE_URL}/gestion_categoria_envios`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response: AxiosResponse<ApiResponse<CategoriaEnvio[]>> = await axiosInstance.get('/gestion_categoria_envios');
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -83,18 +71,10 @@ export const fetchCategoriasEnvio = async (): Promise<ApiResponse<CategoriaEnvio
 
 // Crear una recogida
 export const createRecogida = async (data: RecogidaData): Promise<ApiResponse<{ idRecogida: number }>> => {
-  const token = localStorage.getItem('token');
-  if (!token) throw new Error('No autenticado');
   try {
-    const response: AxiosResponse<ApiResponse<{ idRecogida: number }>> = await axios.post(
-      `${BASE_URL}/gestion_recogidas/crear_recogida`,
-      data,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      }
+    const response: AxiosResponse<ApiResponse<{ idRecogida: number }>> = await axiosInstance.post(
+      '/gestion_recogidas/crear_recogida',
+      data
     );
     return response.data;
   } catch (error) {
@@ -113,18 +93,10 @@ export const createRecogida = async (data: RecogidaData): Promise<ApiResponse<{ 
 
 // Crear una entrega
 export const createEntrega = async (data: EntregaData): Promise<ApiResponse<{ idEntrega: number }>> => {
-  const token = localStorage.getItem('token');
-  if (!token) throw new Error('No autenticado');
   try {
-    const response: AxiosResponse<ApiResponse<{ idEntrega: number }>> = await axios.post(
-      `${BASE_URL}/gestion_entregas/crear_entrega`,
-      data,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      }
+    const response: AxiosResponse<ApiResponse<{ idEntrega: number }>> = await axiosInstance.post(
+      '/gestion_entregas/crear_entrega',
+      data
     );
     return response.data;
   } catch (error) {
@@ -143,15 +115,8 @@ export const createEntrega = async (data: EntregaData): Promise<ApiResponse<{ id
 
 // Crear un envío
 export const createEnvio = async (data: EnvioData): Promise<ApiResponse<Envio>> => {
-  const token = localStorage.getItem('token');
-  if (!token) throw new Error('No autenticado');
   try {
-    const response: AxiosResponse<ApiResponse<Envio>> = await axios.post(`${BASE_URL}/gestion_envios/crear_envio`, data, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    const response: AxiosResponse<ApiResponse<Envio>> = await axiosInstance.post('/gestion_envios/crear_envio', data);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -169,16 +134,8 @@ export const createEnvio = async (data: EnvioData): Promise<ApiResponse<Envio>> 
 
 // Métodos existentes
 export const fetchEnvios = async (): Promise<ApiResponse<Envio[]>> => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    throw new Error('No autenticado');
-  }
   try {
-    const response: AxiosResponse<ApiResponse<Envio[]>> = await axios.get(`${BASE_URL}/gestion_envios`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response: AxiosResponse<ApiResponse<Envio[]>> = await axiosInstance.get('/gestion_envios');
     console.log('Respuesta completa del servidor:', JSON.stringify(response.data, null, 2));
     return response.data;
   } catch (error) {
@@ -196,16 +153,8 @@ export const fetchEnvios = async (): Promise<ApiResponse<Envio[]>> => {
 };
 
 export const fetchEnvioPorId = async (idEnvio: number): Promise<ApiResponse<Envio>> => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    throw new Error('No autenticado');
-  }
   try {
-    const response: AxiosResponse<ApiResponse<Envio>> = await axios.get(`${BASE_URL}/gestion_envios/buscar_envio/${idEnvio}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response: AxiosResponse<ApiResponse<Envio>> = await axiosInstance.get(`/gestion_envios/buscar_envio/${idEnvio}`);
     console.log('Respuesta completa del servidor (búsqueda por ID):', JSON.stringify(response.data, null, 2));
     return response.data;
   } catch (error) {

@@ -1,20 +1,12 @@
 import axios, { AxiosResponse } from 'axios';
 import { ICiudad, ICiudad_ApiResponse } from '../../models/Interfaces/ICiudades';
-
-const BASE_URL = 'http://127.0.0.1:8000/api';
+import { axiosInstance } from '../axiosConfig';
 
 // GET: Obtener todas las ciudades
 export const fetchCiudades = async (): Promise<ICiudad_ApiResponse<ICiudad[]>> => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    console.error('fetchCiudades: No se encontró token en localStorage');
-    throw new Error('No autenticado');
-  }
   try {
-    console.log('fetchCiudades: Enviando solicitud a', `${BASE_URL}/gestion_ciudades`);
-    const response: AxiosResponse<ICiudad_ApiResponse<ICiudad[]>> = await axios.get(`${BASE_URL}/gestion_ciudades`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    console.log('fetchCiudades: Enviando solicitud a', '/gestion_ciudades');
+    const response: AxiosResponse<ICiudad_ApiResponse<ICiudad[]>> = await axiosInstance.get('/gestion_ciudades');
     console.log('fetchCiudades: Respuesta recibida:', JSON.stringify(response.data, null, 2));
     return response.data;
   } catch (error) {
@@ -38,16 +30,9 @@ export const fetchCiudades = async (): Promise<ICiudad_ApiResponse<ICiudad[]>> =
 
 // GET: Obtener una ciudad por ID
 export const fetchCiudadById = async (id: string | number): Promise<ICiudad_ApiResponse<ICiudad>> => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    console.error('fetchCiudadById: No se encontró token en localStorage');
-    throw new Error('No autenticado');
-  }
   try {
-    console.log('fetchCiudadById: Enviando solicitud a', `${BASE_URL}/gestion_ciudades/${id}`);
-    const response: AxiosResponse<ICiudad_ApiResponse<ICiudad>> = await axios.get(`${BASE_URL}/gestion_ciudades/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    console.log('fetchCiudadById: Enviando solicitud a', `/gestion_ciudades/${id}`);
+    const response: AxiosResponse<ICiudad_ApiResponse<ICiudad>> = await axiosInstance.get(`/gestion_ciudades/${id}`);
     console.log('fetchCiudadById: Respuesta recibida:', JSON.stringify(response.data, null, 2));
     return response.data;
   } catch (error) {
@@ -71,19 +56,9 @@ export const fetchCiudadById = async (id: string | number): Promise<ICiudad_ApiR
 
 // POST: Crear una ciudad
 export const createCiudad = async (data: { nombreCiudad: string; costoPor_Ciudad: number }): Promise<ICiudad_ApiResponse<ICiudad>> => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    console.error('createCiudad: No se encontró token en localStorage');
-    throw new Error('No autenticado');
-  }
   try {
-    console.log('createCiudad: Enviando solicitud a', `${BASE_URL}/gestion_ciudades`, 'con datos:', data);
-    const response: AxiosResponse<ICiudad_ApiResponse<ICiudad>> = await axios.post(`${BASE_URL}/gestion_ciudades`, data, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    console.log('createCiudad: Enviando solicitud a', '/gestion_ciudades', 'con datos:', data);
+    const response: AxiosResponse<ICiudad_ApiResponse<ICiudad>> = await axiosInstance.post('/gestion_ciudades', data);
     console.log('createCiudad: Respuesta recibida:', JSON.stringify(response.data, null, 2));
     return response.data;
   } catch (error) {
@@ -104,19 +79,9 @@ export const createCiudad = async (data: { nombreCiudad: string; costoPor_Ciudad
 
 // PUT: Editar una ciudad completamente
 export const updateCiudad = async (id: number, data: { nombreCiudad: string; costoPor_Ciudad: number }): Promise<ICiudad_ApiResponse<ICiudad>> => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    console.error('updateCiudad: No se encontró token en localStorage');
-    throw new Error('No autenticado');
-  }
   try {
-    console.log('updateCiudad: Enviando solicitud a', `${BASE_URL}/gestion_ciudades/${id}`, 'con datos:', data);
-    const response: AxiosResponse<ICiudad_ApiResponse<ICiudad>> = await axios.put(`${BASE_URL}/gestion_ciudades/${id}`, data, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    console.log('updateCiudad: Enviando solicitud a', `/gestion_ciudades/${id}`, 'con datos:', data);
+    const response: AxiosResponse<ICiudad_ApiResponse<ICiudad>> = await axiosInstance.put(`/gestion_ciudades/${id}`, data);
     console.log('updateCiudad: Respuesta recibida:', JSON.stringify(response.data, null, 2));
     return response.data;
   } catch (error) {
@@ -137,19 +102,9 @@ export const updateCiudad = async (id: number, data: { nombreCiudad: string; cos
 
 // PATCH: Editar parcialmente una ciudad
 export const updatePartialCiudad = async (id: number, data: Partial<{ nombreCiudad: string; costoPor_Ciudad: number }>): Promise<ICiudad_ApiResponse<ICiudad>> => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    console.error('updatePartialCiudad: No se encontró token en localStorage');
-    throw new Error('No autenticado');
-  }
   try {
-    console.log('updatePartialCiudad: Enviando solicitud a', `${BASE_URL}/gestion_ciudades/${id}`, 'con datos:', data);
-    const response: AxiosResponse<ICiudad_ApiResponse<ICiudad>> = await axios.patch(`${BASE_URL}/gestion_ciudades/${id}`, data, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    console.log('updatePartialCiudad: Enviando solicitud a', `/gestion_ciudades/${id}`, 'con datos:', data);
+    const response: AxiosResponse<ICiudad_ApiResponse<ICiudad>> = await axiosInstance.patch(`/gestion_ciudades/${id}`, data);
     console.log('updatePartialCiudad: Respuesta recibida:', JSON.stringify(response.data, null, 2));
     return response.data;
   } catch (error) {
@@ -170,16 +125,9 @@ export const updatePartialCiudad = async (id: number, data: Partial<{ nombreCiud
 
 // DELETE: Eliminar una ciudad
 export const deleteCiudad = async (id: number): Promise<ICiudad_ApiResponse<null>> => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    console.error('deleteCiudad: No se encontró token en localStorage');
-    throw new Error('No autenticado');
-  }
   try {
-    console.log('deleteCiudad: Enviando solicitud a', `${BASE_URL}/gestion_ciudades/${id}`);
-    const response: AxiosResponse<ICiudad_ApiResponse<null>> = await axios.delete(`${BASE_URL}/gestion_ciudades/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    console.log('deleteCiudad: Enviando solicitud a', `/gestion_ciudades/${id}`);
+    const response: AxiosResponse<ICiudad_ApiResponse<null>> = await axiosInstance.delete(`/gestion_ciudades/${id}`);
     console.log('deleteCiudad: Respuesta recibida:', JSON.stringify(response.data, null, 2));
     return response.data;
   } catch (error) {

@@ -1,15 +1,10 @@
 import axios, { AxiosResponse } from 'axios';
 import { IAuditoria, IAuditoriaApiResponse } from '../../models/Interfaces/IAuditorias';
-
-const BASE_URL = 'http://127.0.0.1:8000/api';
+import { axiosInstance } from '../axiosConfig';
 
 export const fetchAuditorias = async (): Promise<IAuditoriaApiResponse<IAuditoria[]>> => {
-  const token = localStorage.getItem('token');
-  if (!token) throw new Error('No autenticado');
   try {
-    const response: AxiosResponse<IAuditoriaApiResponse<IAuditoria[]>> = await axios.get(`${BASE_URL}/gestion_auditorias`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response: AxiosResponse<IAuditoriaApiResponse<IAuditoria[]>> = await axiosInstance.get('/gestion_auditorias');
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -21,12 +16,8 @@ export const fetchAuditorias = async (): Promise<IAuditoriaApiResponse<IAuditori
 };
 
 export const fetchAuditoriaById = async (id: number): Promise<IAuditoriaApiResponse<IAuditoria>> => {
-  const token = localStorage.getItem('token');
-  if (!token) throw new Error('No autenticado');
   try {
-    const response: AxiosResponse<IAuditoriaApiResponse<IAuditoria>> = await axios.get(`${BASE_URL}/gestion_auditorias/buscar_auditoria/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response: AxiosResponse<IAuditoriaApiResponse<IAuditoria>> = await axiosInstance.get(`/gestion_auditorias/buscar_auditoria/${id}`);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -38,15 +29,8 @@ export const fetchAuditoriaById = async (id: number): Promise<IAuditoriaApiRespo
 };
 
 export const updatePartialAuditoria = async (id: number, data: Partial<IAuditoria>): Promise<IAuditoriaApiResponse<IAuditoria>> => {
-  const token = localStorage.getItem('token');
-  if (!token) throw new Error('No autenticado');
   try {
-    const response: AxiosResponse<IAuditoriaApiResponse<IAuditoria>> = await axios.patch(`${BASE_URL}/gestion_auditorias/editar_auditoria/${id}`, data, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    const response: AxiosResponse<IAuditoriaApiResponse<IAuditoria>> = await axiosInstance.patch(`/gestion_auditorias/editar_auditoria/${id}`, data);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -58,12 +42,8 @@ export const updatePartialAuditoria = async (id: number, data: Partial<IAuditori
 };
 
 export const deleteAuditoria = async (id: number): Promise<IAuditoriaApiResponse<null>> => {
-  const token = localStorage.getItem('token');
-  if (!token) throw new Error('No autenticado');
   try {
-    const response: AxiosResponse<IAuditoriaApiResponse<null>> = await axios.delete(`${BASE_URL}/gestion_auditorias/eliminar_auditoria/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const response: AxiosResponse<IAuditoriaApiResponse<null>> = await axiosInstance.delete(`/gestion_auditorias/eliminar_auditoria/${id}`);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {

@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { useState, useEffect } from "react";
 import { UserProfile } from '../../models/Interfaces/UserProfile';
-const API_URL = 'http://localhost:8000/api/auth';
+import { axiosInstance } from '../axiosConfig';
 
 // Respuesta esperada del backend al iniciar sesión
 export interface LoginResponse {
@@ -56,14 +56,11 @@ export const AuthLoginService = async (
 ): Promise<LoginResponse | null> => {
   try {
     console.log("[AuthLoginService] Enviando solicitud de login:", { email });
-    const response: AxiosResponse<LoginResponse> = await axios.post(
-      `${API_URL}/login`,
+    const response: AxiosResponse<LoginResponse> = await axiosInstance.post(
+      '/auth/login',
       {
         email,
         contrasena,
-      },
-      {
-        headers: { 'Content-Type': 'application/json' },
       }
     );
 
@@ -239,19 +236,10 @@ export const useAuth = () => {
 // ————————————————————————
 
 export const getUserProfile = async (): Promise<UserProfile> => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    throw new Error('No autenticado');
-  }
-
   try {
-    console.log('Token encontrado:', token); // Verificar que el token está presente
+    console.log('Obteniendo perfil de usuario'); // Verificar que el token está presente
 
-    const response: AxiosResponse = await axios.get(`${API_URL}/mostrar_perfil_auth`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response: AxiosResponse = await axiosInstance.get('/auth/mostrar_perfil_auth');
 
     console.log('Respuesta del backend:', response);
 
@@ -273,16 +261,8 @@ export const getUserProfile = async (): Promise<UserProfile> => {
 //    Invoca al backend para invalidar el token y limpia el storage
 // ————————————————————————
 export const LogoutUser = async (): Promise<void> => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-      throw new Error('No hay sesión activa');
-  }
   try {
-      await axios.post(`${API_URL}/logout`, {}, {
-          headers: {
-              Authorization: `Bearer ${token}`,
-          },
-      });
+      await axiosInstance.post('/auth/logout', {});
       // Limpiar localStorage
       localStorage.removeItem('token');
       localStorage.removeItem('userRole');

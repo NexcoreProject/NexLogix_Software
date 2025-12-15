@@ -79,10 +79,13 @@ const ManagerProfile = () => {
 
                 {/* Opción Administración con submenú */}
                 <div className="nav-item-wrapper">
-                  <Link 
-                    className={`modern-nav-item dropdown-toggle ${getParentLinkClass(['/manager/verAreas', '/manager/Puestos', '/manager/Roles', '/manager/gestionUsuarios']).includes('active') ? 'active' : ''}`}
-                    data-bs-toggle="collapse" 
-                    to="#administracion" 
+                  <a 
+                    className={`modern-nav-item ${getParentLinkClass(['/manager/verAreas', '/manager/Puestos', '/manager/Roles', '/manager/gestionUsuarios']).includes('active') ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setActiveCollapse(activeCollapse === 'administracion' ? null : 'administracion');
+                    }}
+                    href="#"
                     role="button" 
                     aria-expanded={activeCollapse === 'administracion' ? "true" : "false"} 
                     aria-controls="administracion"
@@ -91,7 +94,7 @@ const ManagerProfile = () => {
                     <span>Administración</span>
                     <i className={`bi bi-chevron-right dropdown-arrow ${activeCollapse === 'administracion' ? 'rotated' : ''}`}></i>
                     <div className="nav-glow"></div>
-                  </Link>
+                  </a>
                   <div className={`modern-collapse ${activeCollapse === 'administracion' ? 'show' : ''}`} id="administracion">
                     <div className="submenu-container">
                       <Link className={`submenu-item ${getLinkClass('/manager/verAreas').includes('active') ? 'active' : ''}`} to="/manager/verAreas">
@@ -116,10 +119,13 @@ const ManagerProfile = () => {
 
                 {/* Opción Gestión Auditorías y Reportes con submenú */}
                 <div className="nav-item-wrapper">
-                  <Link 
-                    className={`modern-nav-item dropdown-toggle ${getParentLinkClass(['/manager/reportes', '/manager/categoriaReportes', '/manager/auditorias']).includes('active') ? 'active' : ''}`}
-                    data-bs-toggle="collapse" 
-                    to="#gestionAuditoriasReportes" 
+                  <a 
+                    className={`modern-nav-item ${getParentLinkClass(['/manager/reportes', '/manager/categoriaReportes', '/manager/auditorias']).includes('active') ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setActiveCollapse(activeCollapse === 'gestionAuditoriasReportes' ? null : 'gestionAuditoriasReportes');
+                    }}
+                    href="#"
                     role="button" 
                     aria-expanded={activeCollapse === 'gestionAuditoriasReportes' ? "true" : "false"} 
                     aria-controls="gestionAuditoriasReportes"
@@ -128,7 +134,7 @@ const ManagerProfile = () => {
                     <span>Auditorías y Reportes</span>
                     <i className={`bi bi-chevron-right dropdown-arrow ${activeCollapse === 'gestionAuditoriasReportes' ? 'rotated' : ''}`}></i>
                     <div className="nav-glow"></div>
-                  </Link>
+                  </a>
                   <div className={`modern-collapse ${activeCollapse === 'gestionAuditoriasReportes' ? 'show' : ''}`} id="gestionAuditoriasReportes">
                     <div className="submenu-container">
                       <Link className={`submenu-item ${getLinkClass('/manager/reportes').includes('active') ? 'active' : ''}`} to="/manager/reportes">
@@ -149,10 +155,13 @@ const ManagerProfile = () => {
 
                 {/* Opción Gestión Logística con submenú */}
                 <div className="nav-item-wrapper">
-                  <Link 
-                    className={`modern-nav-item dropdown-toggle ${getParentLinkClass(['/manager/vehiculos', '/manager/conductores', '/manager/rutas', '/manager/ciudades']).includes('active') ? 'active' : ''}`}
-                    data-bs-toggle="collapse" 
-                    to="#VehiculosSubmenu" 
+                  <a 
+                    className={`modern-nav-item ${getParentLinkClass(['/manager/vehiculos', '/manager/conductores', '/manager/rutas', '/manager/ciudades']).includes('active') ? 'active' : ''}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setActiveCollapse(activeCollapse === 'VehiculosSubmenu' ? null : 'VehiculosSubmenu');
+                    }}
+                    href="#"
                     role="button" 
                     aria-expanded={activeCollapse === 'VehiculosSubmenu' ? "true" : "false"} 
                     aria-controls="VehiculosSubmenu"
@@ -161,7 +170,7 @@ const ManagerProfile = () => {
                     <span>Gestión Logística</span>
                     <i className={`bi bi-chevron-right dropdown-arrow ${activeCollapse === 'VehiculosSubmenu' ? 'rotated' : ''}`}></i>
                     <div className="nav-glow"></div>
-                  </Link>
+                  </a>
                   <div className={`modern-collapse ${activeCollapse === 'VehiculosSubmenu' ? 'show' : ''}`} id="VehiculosSubmenu">
                     <div className="submenu-container">
                       <Link className={`submenu-item ${getLinkClass('/manager/vehiculos').includes('active') ? 'active' : ''}`} to="/manager/vehiculos">

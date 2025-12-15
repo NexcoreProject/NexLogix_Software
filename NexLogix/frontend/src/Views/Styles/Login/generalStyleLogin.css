@@ -62,7 +62,6 @@
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 20px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
-  min-height: 420px;
 }
 
 .login-card::before{
@@ -90,7 +89,7 @@
   border-radius: 10px; padding: .6rem .8rem; margin: .75rem 0 1rem;
 }
 
-.login-form { display: flex; flex-direction: column; gap: .9rem; min-height: 260px; }
+.login-form { display: flex; flex-direction: column; gap: .9rem; }
 .input-wrap { position: relative; display: grid; grid-template-columns: 44px 1fr; align-items: center; gap: .35rem; }
 .input-icon { display: grid; place-items: center; height: 48px; width: 44px; border-radius: 12px; background: #1e2338; color: var(--primary); border: 1px solid rgba(255,255,255,0.08); }
 .input { height: 48px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.06); color: var(--text); border-radius: 12px; outline: none; padding: 0 .9rem; }
@@ -105,15 +104,6 @@
   box-shadow: 0 10px 30px rgba(46, 74, 150, 0.45), inset 0 1px 0 rgba(255,255,255,0.15);
 }
 .login-btn:hover { filter: brightness(1.06); box-shadow: 0 12px 36px rgba(46, 74, 150, 0.55), inset 0 1px 0 rgba(255,255,255,0.22); }
-.blocked-link {
-  margin-top: auto; margin-bottom: .2rem; width: 100%;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.12);
-  color: var(--muted); cursor: pointer; text-decoration: none;
-  display: flex; align-items: center; justify-content: center;
-  height: 42px; border-radius: 12px;
-}
-.blocked-link:hover { background: rgba(255,255,255,0.06); color: var(--text); }
 
 /* Modal de Usuario Bloqueado */
 .blocked-modal-backdrop { 
@@ -237,8 +227,8 @@
   padding: 1.75rem 1.5rem;
 }
 .auth-card::before { content: ""; position: absolute; inset: -2px; border-radius: 18px; padding: 2px; background: linear-gradient(135deg, rgba(80,95,143,0.35), rgba(60,72,111,0.35)); mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
-.auth-card-header h2 { margin: 0; font-weight: 700; font-size: 1.4rem; }
-.auth-card-header p { margin: .35rem 0 1rem; color: var(--nx-muted); }
+.auth-card-header h2 { margin: 0 0 .3rem 0; font-weight: 700; font-size: 1.4rem; }
+.auth-card-header p { margin: 0 0 1.2rem 0; color: var(--nx-muted); }
 
 /* Campos dentro del card */
 .auth-card .input-icon { background: var(--nx-surface-2); color: var(--nx-primary); border-color: rgba(255,255,255,0.09); }

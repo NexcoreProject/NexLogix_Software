@@ -50,29 +50,62 @@ body {
     color: white !important;
 }
 
-/* Habilitar desplazamiento en la barra desplegable */
-.dropdown-menu {
-    background-color: #161625 !important;
-    border: none;
-    max-height: 250px; /* Ajusta la altura máxima antes del scroll */
+/* Estilos para botones split (dropdown-toggle-split) */
+.btn-success.dropdown-toggle-split {
+    border-left: 2px solid rgba(255,255,255,0.3) !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    opacity: 0.95;
 }
 
-/* Estilos para los ítems del dropdown */
-.dropdown-item {
-    color: white !important; /* Cambiado de rgb(21, 255, 0) a white */
+.btn-success.dropdown-toggle-split:hover {
+    opacity: 1;
+    background-color: rgba(25, 135, 84, 0.9) !important;
+    border-left: 2px solid rgba(255,255,255,0.5) !important;
 }
 
-.dropdown-item:hover, .dropdown-item:focus {
-    background-color: #232c42 !important;
+.btn-success.dropdown-toggle-split::after {
+    margin-left: 0;
+    vertical-align: middle;
+}
+
+/* Habilitar desplazamiento en la barra desplegable (solo para reportes y páginas, no navbar) */
+.card .dropdown-menu:not(.navbar-dropdown),
+.areas_container .dropdown-menu:not(.navbar-dropdown) {
+    background: linear-gradient(180deg, #232c42, #1d2236) !important;
+    border: 1px solid rgba(98,123,178,0.35) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08) !important;
+    max-height: 250px;
+    padding: 0.5rem !important;
+    margin-top: 0.5rem !important;
+    width: 100% !important;
+}
+
+/* Estilos para los ítems del dropdown (solo reportes y páginas) */
+.card .dropdown-menu:not(.navbar-dropdown) .dropdown-item,
+.areas_container .dropdown-menu:not(.navbar-dropdown) .dropdown-item {
+    color: #e8ebff !important;
+    border-radius: 8px !important;
+    padding: 0.6rem 0.9rem !important;
+    margin-bottom: 0.25rem !important;
+    transition: all 0.2s ease !important;
+}
+
+.card .dropdown-menu:not(.navbar-dropdown) .dropdown-item:hover,
+.card .dropdown-menu:not(.navbar-dropdown) .dropdown-item:focus,
+.areas_container .dropdown-menu:not(.navbar-dropdown) .dropdown-item:hover,
+.areas_container .dropdown-menu:not(.navbar-dropdown) .dropdown-item:focus {
+    background: rgba(80,95,143,0.35) !important;
     color: #ffffff !important;
+    transform: translateX(4px);
 }
 
-/* Fondo rojo para los ítems del submenú cuando el menú está abierto */
-.dropdown-menu.show .dropdown-item,
-.nav .show > .dropdown-item {
-    background-color: #dc3543 !important;
-    color: #fff !important;
+.card .dropdown-menu:not(.navbar-dropdown) .dropdown-item:last-child,
+.areas_container .dropdown-menu:not(.navbar-dropdown) .dropdown-item:last-child {
+    margin-bottom: 0 !important;
 }
+
 /* Estado oculto */
 .collapse {
     margin-left: 0rem;

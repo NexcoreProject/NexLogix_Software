@@ -2,7 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { LogoutUser } from "../../services/Auth/AuthService";
 import { UserProfile } from "../../models/Interfaces/UserProfile";
-import axios from "axios";
+import { axiosInstance } from "../../services/axiosConfig";
 
 
 
@@ -13,8 +13,6 @@ interface ResponseData<T> {
 }
 
 // GET PROFILE
-const API_URL = 'http://localhost:8000/api/auth';
-
 export const UserProfileController = async (): Promise<{ data: ResponseData<UserProfile> }> => {
   const token = localStorage.getItem('token');
   if (!token) {
@@ -23,11 +21,7 @@ export const UserProfileController = async (): Promise<{ data: ResponseData<User
 
   try {
     console.log('Token en UserProfileController:', token);
-    const response = await axios.get(`${API_URL}/mostrar_perfil_auth`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axiosInstance.get('/auth/mostrar_perfil_auth');
     console.log('Respuesta del servidor:', response.data);
     // Ajustar la respuesta para que coincida con ResponseData
     return {

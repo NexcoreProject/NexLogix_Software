@@ -69,21 +69,15 @@ const NavbarGeneral = () => {
                     >
                         Configuraciones
                     </a>
-                    <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                    <ul className="dropdown-menu dropdown-menu-end navbar-dropdown" aria-labelledby="navbarDropdown">
                         <li>
+                            {/* AQUI SE PONE EL LINK DEL MANUAL */}
                             <a
                                 className="dropdown-item custom-bg"
-                                href="#"
+                                href="#" 
+                                download
                             >
-                                Configuración de informacion personal
-                            </a>
-                        </li>
-                        <li>
-                            <a
-                                className="dropdown-item custom-bg"
-                                href="#"
-                            >
-                                Preferencias de idioma
+                                Descargar Manual de Usuario
                             </a>
                         </li>
                         <li>
