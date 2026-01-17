@@ -89,14 +89,8 @@ Route::group([
 
 
 //
-/*
-    La razon por la cual en todas las rutas se pone auth:api, es para que esta ruta solo este funcionando si esta autenticada,
-    gracias al middleware que es checkrole, se revisa el role del usuario, si cumple los requerimientos se enruta a su respectivas
-    funciones y permisos por el role.
-*/
-//
+///
 
-//----------------------------------------------------------------------------------------------------------------------------------------
 
 //
 /// GESTION USUARIOS
@@ -470,7 +464,7 @@ Route::group([
 /// VEHICULOS
 //
 
-use App\Http\Controllers\vehiculos\VehiculosController;
+use App\Http\Controllers\Vehiculos\VehiculosController;
 
 Route::group([
     'middleware' => ['api', 'auth:api'],

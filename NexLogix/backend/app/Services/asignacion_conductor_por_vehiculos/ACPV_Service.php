@@ -1,5 +1,5 @@
 <?php
-namespace App\Services\Asignacion_Conductor_Por_Vehiculos;
+namespace App\Services\asignacion_conductor_por_vehiculos;
 
 use App\Models\asignacion_conductor_por_vehiculos;
 use Exception;
