@@ -33,6 +33,8 @@ build/
 .vscode/
 docker-compose.yml
 docker-compose.override.yml
+compose.yaml
+compose.yml
 
 ### Spring Boot ###
 *.properties
