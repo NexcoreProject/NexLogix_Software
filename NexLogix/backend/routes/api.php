@@ -89,14 +89,8 @@ Route::group([
 
 
 //
-/*
-    La razon por la cual en todas las rutas se pone auth:api, es para que esta ruta solo este funcionando si esta autenticada,
-    gracias al middleware que es checkrole, se revisa el role del usuario, si cumple los requerimientos se enruta a su respectivas
-    funciones y permisos por el role.
-*/
-//
+///
 
-//----------------------------------------------------------------------------------------------------------------------------------------
 
 //
 /// GESTION USUARIOS
@@ -446,11 +440,31 @@ Route::group([
         ->middleware('role:2');
 });
 
+// GESTION REPORTES CONDUCTORES
+use App\Http\Controllers\ControllerReportesConductores;
+
+Route::group([
+    'middleware' => ['api', 'auth:api'],
+    'prefix' => 'gestion_reportes_conductores'
+], function () {
+    // pagination route must be before the '/{id}' route to avoid numeric id conflict
+    Route::get('/page/{page}/{order?}', [ControllerReportesConductores::class, 'getAllRPPage'])
+        ->middleware('role:2,3');
+    Route::get('/{id}', [ControllerReportesConductores::class, 'getRPByID'])
+        ->middleware('role:2,3');
+    Route::post('/', [ControllerReportesConductores::class, 'createRP'])
+        ->middleware('role:2,3');
+    Route::patch('/{id}', [ControllerReportesConductores::class, 'updateRP'])
+        ->middleware('role:2');
+    Route::delete('/{id}', [ControllerReportesConductores::class, 'deleteRP'])
+        ->middleware('role:2');
+});
+
 //
 /// VEHICULOS
 //
 
-use App\Http\Controllers\vehiculos\VehiculosController;
+use App\Http\Controllers\Vehiculos\VehiculosController;
 
 Route::group([
     'middleware' => ['api', 'auth:api'],

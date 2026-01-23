@@ -1,5 +1,5 @@
 <?php
-namespace App\Services\asignacion_conductor_por_vehiculos;
+namespace App\Services\Asignacion_Conductor_Por_Vehiculos;
 
 use App\Models\asignacion_conductor_por_vehiculos;
 use Exception;
@@ -39,9 +39,8 @@ class ACPV_Service
         }
     }
 
-
-public function showBySearching_ACPV(array $data)
-{
+    public function showBySearching_ACPV(array $data)
+    {
         try {
             // eager load the conductor's estado relations and vehicle
             $ACPV = asignacion_conductor_por_vehiculos::with([
@@ -57,14 +56,13 @@ public function showBySearching_ACPV(array $data)
                 'status' => 200
             ];
         } catch (ModelNotFoundException $e) {
-        return [
-            'success' => false,
-            'message' => 'No se encontró la asignación de conductor por vehículo',
-            'status' => 404
-        ];
+            return [
+                'success' => false,
+                'message' => 'No se encontró la asignación de conductor por vehículo',
+                'status' => 404
+            ];
+        }
     }
-}
-
 
     // POST
     public function create_ACPV(array $data)

@@ -112,18 +112,6 @@ const Login = () => { // Componente de Login (solo UI cambiada)
             <button type="submit" className="login-btn">
               Iniciar Sesión
             </button>
-
-            <button
-              type="button"
-              className="blocked-link"
-              onClick={() => {
-                setShowBlocked(true);
-                setBlockedStatus({ state: "idle" });
-              }}
-              aria-label="Solicitud de desbloqueo de usuario"
-            >
-              ¿Usuario Bloqueado?
-            </button>
           </form>
         </section>
       </div>
