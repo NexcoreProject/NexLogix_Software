@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0.42
+    container_name: nexlogix_mysql
+    restart: always
+    environment:
+      # Estas son las variables que MYSQL necesita (nombres específicos de MySQL)
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}      
+      MYSQL_DATABASE: ${DB_DATABASE}            
+      MYSQL_USER: ${DB_USERNAME}                 
+      MYSQL_PASSWORD: ${DB_PASSWORD}             
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - nexlogix_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 5
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: nexlogix_phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: ${DB_HOST}                      
+      PMA_PORT: ${DB_PORT}                       
+      PMA_USER: ${DB_USERNAME}                   
+      PMA_PASSWORD: ${DB_PASSWORD}               
+    ports:
+      - "8081:80"
+    networks:
+      - nexlogix_network
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  backend:
+    build: .
+    image: nexlogix-backend:v1.2
+    container_name: nexlogix-php-back
+    restart: always
+    env_file:
+      - .env                                      
+    ports:
+      - "8000:80"
+    volumes:
+      - ./.env:/var/www/html/.env                # ← por si acaso Laravel lee el archivo
+      - ./storage:/var/www/html/storage          # para logs, cache, etc.
+    networks:
+      - nexlogix_network
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+networks:
+  nexlogix_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
